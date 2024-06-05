@@ -1,23 +1,28 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function App() {
+  const [initData, setInitData] = useState('');
+
+  useEffect(() => {
+    if (window.Telegram.WebApp.initData) {
+      setInitData(window.Telegram.WebApp.initData);
+    }
+  }, []);
+
+  const validateData = async () => {
+    try {
+      const response = await axios.post('https://f1a07255bfc6.ngrok.app/validate', { initData });
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error validating data:', error);
+    }
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Telegram Init Data Validator</h1>
+      <button onClick={validateData}>Validate Init Data</button>
     </div>
   );
 }
