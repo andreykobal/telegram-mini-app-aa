@@ -1,3 +1,4 @@
+const { privateKeyToAccount, generatePrivateKey } = require('viem/accounts')
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
@@ -67,11 +68,25 @@ app.post('/validate', async (req, res) => {
         try {
             let user = await User.findOne({ telegramId });
             if (!user) {
-                user = new User({ telegramId });
+                const privateKey = generatePrivateKey();
+                const account = privateKeyToAccount(privateKey);
+                user = new User({
+                    telegramId,
+                    walletAddress: account.address,
+                    privateKey
+                });
                 await user.save();
-                console.log('New user created:', user);
+                console.log('New user created with wallet:', user);
             } else {
                 console.log('User found:', user);
+                if (!user.walletAddress || !user.privateKey) {
+                    const privateKey = generatePrivateKey();
+                    const account = privateKeyToAccount(privateKey);
+                    user.walletAddress = account.address;
+                    user.privateKey = privateKey;
+                    await user.save();
+                    console.log('Updated user with wallet:', user);
+                }
             }
 
             return res.status(200).json({ user });
