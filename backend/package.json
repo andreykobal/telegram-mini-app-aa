@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/identity": "^4.2.0",
+    "@azure/keyvault-secrets": "^4.8.0",
     "@biconomy/account": "^4.4.5",
     "axios": "^1.7.2",
     "body-parser": "^1.20.2",
