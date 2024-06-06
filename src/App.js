@@ -133,6 +133,13 @@ function App() {
     setShowPopup(true);
   };
 
+  useEffect(() => {
+    if (showPopup) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [showPopup]);
 
   return (
     <div className="App">
