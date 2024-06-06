@@ -11,7 +11,7 @@ const config = {
     biconomyPaymasterApiKey: "s2GjnlFeb.de9978aa-3c41-4912-a3cd-accd4c02a767",
     bundlerUrl: "https://bundler.biconomy.io/api/v2/11155111/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
     nftAddress: "0x5dA076A7a10560E0d597E131489fDd0Dc28c7951",
-    tokenURI: "https://gateway.pinata.cloud/ipfs/QmWguri8vFyK9jtgr82SMeKvQYxsVGJn3Xyuk4FwGsFwfx" // Replace with actual token URI
+    tokenURI: "https://gateway.pinata.cloud/ipfs/QmRDS7eWPQv27RrCh5fKrjModK6GYTDCyL6qVf6615V7Hs" // Replace with actual token URI
 };
 
 async function mint(privateKey) {

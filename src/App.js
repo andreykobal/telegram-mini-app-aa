@@ -41,6 +41,7 @@ function App() {
       try {
         const response = await axios.post('https://f1a07255bfc6.ngrok.app/authenticate', { initData });
         console.log(response.data);
+        getNFTs(); // Call getNFTs after successful authentication
       } catch (error) {
         console.error('Error validating data:', error);
       }
@@ -95,7 +96,7 @@ function App() {
   return (
     <div className="App">
       <div className="nft-page">
-        <h1>Telegram Init Data Validator</h1>
+        <p className='glow-text'>Account Abstraction Magic</p>
         <button onClick={mint}>Mint</button>
         <div>
           <input
@@ -112,7 +113,6 @@ function App() {
           />
           <button onClick={transfer}>Transfer</button>
         </div>
-        <button onClick={getNFTs}>Get NFTs</button>
         <div className="nft-container">
           {nfts.map((nft, index) => {
             const { name, image, attributes } = nft.metadata;
