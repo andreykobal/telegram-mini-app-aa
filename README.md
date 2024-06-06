@@ -1,159 +1,171 @@
-# Account Abstraction Magic
+# 🪄 Welcome to Account Abstraction Magic! 🪄
 
-🪄 Welcome to Account Abstraction Magic! 🪄
-
-A seamless experience for Telegram users to interact with NFTs.
+A seamless experience for Telegram users!
 
 ## Table of Contents
 
-- [Account Abstraction Magic](#account-abstraction-magic)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Screenshots](#screenshots)
-  - [Installation](#installation)
-    - [Prerequisites](#prerequisites)
-    - [Backend (Express.js)](#backend-expressjs)
-    - [Frontend (React)](#frontend-react)
-  - [Usage](#usage)
-  - [API Endpoints](#api-endpoints)
-  - [Folder Structure](#folder-structure)
-  - [Technologies Used](#technologies-used)
-  - [Contributing](#contributing)
-  - [License](#license)
-  - [Contact](#contact)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+- [Folder Structure](#folder-structure)
+- [Technologies Used](#technologies-used)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
 ## Features
 
-- **Custodial Wallet**: Created at first use, securely stored in Azure Key Vault.
-- **Smart Accounts**: Auto-creation using Biconomy's AA.
-- **Mint NFTs**: Tap the mint button to use your smart account.
-- **No Gas Fees**: Biconomy Paymaster covers them!
-- **Transfer NFTs**: Withdraw and transfer your NFTs easily.
-- **View on OpenSea**: Check out your NFTs on OpenSea.
-- **Deployed on Base**: Fast, cheap transactions.
-- **Your NFTs**: Displayed directly in the app.
+- **💼 Custodial Wallet**: Created at first use, securely stored in Azure Key Vault.
+- **🔑 Smart Accounts**: Auto-creation using Biconomy's AA.
+- **⚡️ Mint NFTs**: Tap the mint button to use your smart account.
+- **💸 No Gas Fees**: Biconomy Paymaster covers them!
+- **🔄 Transfer NFTs**: Withdraw and transfer your NFTs easily.
+- **🌐 View on OpenSea**: Check out your NFTs on OpenSea.
+- **⚡️ Deployed on Base**: Fast, cheap transactions.
+- **📲 Your NFTs**: Displayed directly in the app.
+- 👉 **Click the button below to open the app!**
 
 ## Screenshots
 
-Include some screenshots or a gif of your app in action.
+
 
 ## Installation
 
-### Prerequisites
-
-- Node.js (version)
-- npm or yarn (version)
-
-### Backend (Express.js)
-
-1. Clone the repo
+1. Clone the repository:
    ```sh
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/yourusername/yourrepository.git
    ```
-2. Navigate to the backend directory
+
+2. Navigate to the project directory:
    ```sh
-   cd your-repo/backend
+   cd yourrepository
    ```
-3. Install NPM packages
+
+3. Install dependencies for the frontend:
    ```sh
+   cd frontend
    npm install
    ```
-4. Create a `.env` file and add the required environment variables
-   ```plaintext
-   PORT=5001
-   DB_CONNECTION_STRING=your_db_connection_string
-   BOT_TOKEN=your_telegram_bot_token
-   ```
-5. Start the server
-   ```sh
-   npm start
-   ```
 
-### Frontend (React)
-
-1. Navigate to the frontend directory
+4. Install dependencies for the backend:
    ```sh
-   cd your-repo/frontend
-   ```
-2. Install NPM packages
-   ```sh
+   cd ../backend
    npm install
-   ```
-3. Create a `.env` file and add the required environment variables
-   ```plaintext
-   REACT_APP_API_URL=http://localhost:5001
-   REACT_APP_PINATA_TOKEN=your_pinata_token
-   ```
-4. Start the React app
-   ```sh
-   npm start
    ```
 
 ## Usage
 
-1. Open the Telegram app and navigate to the bot.
-2. Click the button below to open the app.
-3. Use the app to mint, view, and transfer your NFTs.
+1. Start the backend server:
+   ```sh
+   cd backend
+   npm start
+   ```
+
+2. Start the frontend application:
+   ```sh
+   cd ../frontend
+   npm start
+   ```
+
+3. Open your browser and navigate to `http://localhost:3000`
 
 ## API Endpoints
 
-List of API endpoints and their descriptions.
+### POST /authenticate
+- **Description**: Authenticate a user using Telegram init data.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string"
+  }
+  ```
 
-### Auth
+### POST /mint
+- **Description**: Mint a new NFT.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string"
+  }
+  ```
 
-- `POST /api/authenticate` - Authenticate a user.
+### POST /transfer
+- **Description**: Transfer an NFT to another address.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "tokenId": "string",
+    "toAddress": "string"
+  }
+  ```
 
-### NFTs
-
-- `POST /api/mint` - Mint a new NFT.
-- `POST /api/transfer` - Transfer an NFT.
-- `POST /api/getNFTs` - Get user's NFTs.
+### POST /getNFTs
+- **Description**: Retrieve NFTs owned by the authenticated user.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string"
+  }
+  ```
 
 ## Folder Structure
 
 ```plaintext
-your-repo/
-│
-├── backend/                # Express.js backend
-│   ├── models/             # Database models
-│   ├── nft.js              # NFT related functions
-│   ├── create-wallet.js    # Create wallet utility
-│   ├── index.js            # Server entry point
-│   └── package.json        # NPM dependencies and scripts
-│
-├── frontend/               # React frontend
-│   ├── public/             # Public assets
-│   ├── src/                # Source files
-│   │   ├── App.js          # Main App component
-│   │   └── index.js        # Entry point
-│   ├── .env                # Environment variables
-│   └── package.json        # NPM dependencies and scripts
-│
-└── README.md               # Project documentation
+.
+├── .gitignore
+├── backend
+│   ├── .gitignore
+│   ├── create-wallet.js
+│   ├── index.js
+│   ├── metadata.json
+│   ├── models
+│   │   ├── MetadataIndex.js
+│   │   └── User.js
+│   ├── nft.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── utils
+│   │   └── delete-user.js
+│   └── webhook.js
+├── package-lock.json
+├── package.json
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   ├── logo192.png
+│   ├── logo512.png
+│   ├── manifest.json
+│   └── robots.txt
+├── README.md
+└── src
+    ├── App.css
+    ├── App.js
+    ├── App.test.js
+    ├── icons
+    │   ├── circle-xmark-regular.svg
+    │   └── Logomark-Blue.svg
+    ├── index.css
+    ├── index.js
+    ├── logo.svg
+    ├── reportWebVitals.js
+    └── setupTests.js
 ```
 
 ## Technologies Used
 
-- **Frontend**: React, Axios
-- **Backend**: Express.js, MongoDB, Mongoose, Azure Key Vault
-- **Blockchain**: Biconomy, Viem, Base Sepolia
+- **Frontend**: React
+- **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Blockchain**: Viem, Biconomy
+- **Hosting**: Azure
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## Contact
-
-Your Name - [@your-twitter-handle](https://twitter.com/your-twitter-handle) - email@example.com
-
-Project Link: [https://github.com/your-username/your-repo](https://github.com/your-username/your-repo)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
