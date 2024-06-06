@@ -1,5 +1,3 @@
-//frontend
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
@@ -9,6 +7,30 @@ function App() {
   const [tokenId, setTokenId] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [nfts, setNfts] = useState([]);
+
+  const getRarityDetails = (rarity) => {
+    switch (rarity) {
+      case 100: return { label: 'Uncommon', className: 'uncommon', color: '🟢' };
+      case 200: return { label: 'Rare', className: 'rare', color: '🔵' };
+      case 300: return { label: 'Epic', className: 'epic', color: '🟣' };
+      case 400: return { label: 'Legendary', className: 'legendary', color: '🟠' };
+      case 500: return { label: 'Mythical', className: 'mythical', color: '🔴' };
+      default: return { label: 'Common', className: 'unknown', color: '⚪' };
+    }
+  };
+
+  const updatePinataUrl = (url) => {
+    const pinataGatewayToken = "YOUR_PINATA_GATEWAY_TOKEN";
+    const pinataGatewayPrefix = "https://gateway.pinata.cloud/ipfs/";
+    const newPrefix = "https://myethernity.mypinata.cloud/ipfs/";
+
+    if (url.startsWith(pinataGatewayPrefix)) {
+      const cid = url.split(pinataGatewayPrefix)[1];
+      return `${newPrefix}${cid}?pinataGatewayToken=${pinataGatewayToken}`;
+    }
+
+    return url;
+  };
 
   useEffect(() => {
     if (window.Telegram.WebApp.initData) {
@@ -49,61 +71,75 @@ function App() {
     try {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/getNFTs', { initData });
       console.log(response.data);
-      setNfts(response.data.nfts);
+      const nftPromises = response.data.nfts[0].map(async (tokenId, index) => {
+        const tokenUri = response.data.nfts[1][index];
+        const metadata = await fetchMetadata(updatePinataUrl(tokenUri));
+        return { tokenId, metadata };
+      });
+      const nftData = await Promise.all(nftPromises);
+      setNfts(nftData);
     } catch (error) {
       console.error('Error fetching NFTs:', error);
     }
   };
-  
+
+  const fetchMetadata = async (url) => {
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching metadata:', error);
+    }
+  };
 
   return (
     <div className="App">
-      <h1>Telegram Init Data Validator</h1>
-      <button onClick={mint}>Mint</button>
-      <div>
-        <input
-          type="text"
-          placeholder="Token ID"
-          value={tokenId}
-          onChange={(e) => setTokenId(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Address"
-          value={toAddress}
-          onChange={(e) => setToAddress(e.target.value)}
-        />
-        <button onClick={transfer}>Transfer</button>
-      </div>
-      <button onClick={getNFTs}>Get NFTs</button>
-      <div>
-        {nfts[0]?.map((tokenId, index) => (
-          <div key={index}>
-            <p>Token ID: {tokenId.toString()}</p>
-            <p>Token URI: {nfts[1][index]}</p>
-          </div>
-        ))}
-      </div>
-
       <div className="nft-page">
+        <h1>Telegram Init Data Validator</h1>
+        <button onClick={mint}>Mint</button>
+        <div>
+          <input
+            type="text"
+            placeholder="Token ID"
+            value={tokenId}
+            onChange={(e) => setTokenId(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            value={toAddress}
+            onChange={(e) => setToAddress(e.target.value)}
+          />
+          <button onClick={transfer}>Transfer</button>
+        </div>
+        <button onClick={getNFTs}>Get NFTs</button>
         <div className="nft-container">
-          <div className="nft-card flip-card mythical no-overflow">
-            <div className="flip-card-inner mythical">
-              <div className="flip-card-front" style={{ backgroundImage: 'url("https://bot.ethernity.game/nft-demo-new.jpg")' }}>
-                <div className='nft-card-header'>
-                  <p>AVA #4</p>
-                </div>
-                <div className='nft-card-body'>
-                  <div className="nft-info">
-                    <p>❤️+5</p>
-                    <p>🔴Mythical</p>
-                    <p>🪙500,000</p>
+          {nfts.map((nft, index) => {
+            const { name, image, attributes } = nft.metadata;
+            const { className, color, label } = getRarityDetails(attributes.find(attr => attr.trait_type === 'rarity').value);
+            const multiplier = attributes.find(attr => attr.trait_type === 'multiplier').value;
+            const bonus = attributes.find(attr => attr.trait_type === 'bonus').value;
+
+            return (
+              <div className={`nft-card flip-card no-overflow`} key={index}>
+                <div className={`flip-card-inner ${className}`}>
+                  <div className="flip-card-front" style={{ backgroundImage: `url(${updatePinataUrl(image)})` }}>
+                    <div className='nft-card-header'>
+                      <p>{name}</p>
+                    </div>
+                    <div className='nft-card-body'>
+                      <div className="nft-info">
+                        <p>❤️+{multiplier}</p>
+                        <p>{color}{label}</p>
+                        <p>🪙{bonus.toLocaleString()}</p>
+                      </div>
+                      <div className="nft-button-use">Transfer</div>
+                    </div>
                   </div>
-                  <div className="nft-button-use">Transfer</div>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
