@@ -292,6 +292,10 @@ button {
   justify-content: center;
   font-size: 12px;
 }
+.sell-opensea-blank {
+  width: 24px;
+  height: 24px;
+}
 
 .nft-button-use {
   display: flex;
@@ -553,4 +557,7 @@ button {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+.orange {
+  color: #FF9502;
 }

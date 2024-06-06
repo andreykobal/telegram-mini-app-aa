@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
+import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
+
 
 
 function App() {
@@ -92,7 +94,11 @@ function App() {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
       console.log(response.data);
       const { transactionHash } = response.data;
-      setPopupContent({ message: `Minting success - transaction hash: ${transactionHash}`, showLoader: false });
+      const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
+      setPopupContent({
+        message: `Minting success - transaction hash: <a href="${txLink}" class="orange" target="_blank" rel="noopener noreferrer">${transactionHash}</a>`,
+        showLoader: false
+      });
       getNFTs();
     } catch (error) {
       setPopupContent({ message: 'Error minting NFT. Please try again.', showLoader: false }); // Display error message
@@ -106,13 +112,18 @@ function App() {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
       console.log(response.data);
       const { transactionHash } = response.data;
-      setPopupContent({ message: `Transfer success - transaction hash: ${transactionHash}`, showLoader: false });
+      const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
+      setPopupContent({
+        message: `Transfer success - transaction hash: <a href="${txLink}" class="orange" target="_blank" rel="noopener noreferrer">${transactionHash}</a>`,
+        showLoader: false
+      });
       getNFTs();
     } catch (error) {
       setPopupContent({ message: 'Error transferring NFT. Please try again.', showLoader: false }); // Display error message
       console.error('Error transferring NFT:', error);
     }
   };
+
 
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
@@ -145,7 +156,12 @@ function App() {
                 <div className={`flip-card-inner ${className}`}>
                   <div className="flip-card-front" style={{ backgroundImage: `url(${updatePinataUrl(image)})` }}>
                     <div className='nft-card-header'>
+                      <div className="sell-opensea-blank">
+                      </div>
                       <p>{name}</p>
+                      <div className="sell-opensea" onClick={() => window.open(`https://testnets.opensea.io/assets/base-sepolia/YOUR_CONTRACT_ADDRESS/${nft.tokenId}/`, '_blank')}>
+                        <LogoMark className='logo-opensea' />
+                      </div>
                     </div>
                     <div className='nft-card-body'>
                       <div className="nft-info">
@@ -173,7 +189,7 @@ function App() {
               </>
             ) : popupContent.message.includes('transaction hash') ? (
               <>
-                <p className="popup-content-message">{popupContent.message}</p>
+                <p className="popup-content-message" dangerouslySetInnerHTML={{ __html: popupContent.message }}></p>
                 <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
               </>
             ) : (
@@ -194,6 +210,7 @@ function App() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
