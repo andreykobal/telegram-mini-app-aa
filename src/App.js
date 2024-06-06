@@ -29,7 +29,7 @@ function App() {
   };
 
   const updatePinataUrl = (url) => {
-    const pinataGatewayToken = "YOUR_PINATA_GATEWAY_TOKEN";
+    const pinataGatewayToken = process.env.REACT_APP_PINATA_TOKEN;
     const pinataGatewayPrefix = "https://gateway.pinata.cloud/ipfs/";
     const newPrefix = "https://myethernity.mypinata.cloud/ipfs/";
 
