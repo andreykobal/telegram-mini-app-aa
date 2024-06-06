@@ -57,35 +57,6 @@ function App() {
     authenticateData();
   }, [initData]);
 
-  const mint = async () => {
-    try {
-      setShowPopup(true);
-      setPopupContent({ message: 'Minting NFT...', showLoader: true }); // Show minting message with loader
-      const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
-      console.log(response.data);
-      const { transactionHash } = response.data; // Extract the transaction hash from the response
-      setPopupContent({ message: `Minting success - transaction hash: ${transactionHash}`, showLoader: false }); // Display success message and transaction hash
-      getNFTs(); // Reload the NFTs list after minting success
-    } catch (error) {
-      console.error('Error minting data:', error);
-    }
-  };
-
-
-
-  
-  const transfer = async () => {
-    try {
-      const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
-      console.log(response.data);
-      const { transactionHash } = response.data; // Extract the transaction hash from the response
-      alert(`Transfer success - transaction hash: ${transactionHash}`); // Display success message and transaction hash
-      setShowPopup(false); // Close the popup after transfer
-    } catch (error) {
-      console.error('Error transferring NFT:', error);
-    }
-  };
-
   const getNFTs = async () => {
     try {
       setLoading(true); // Set loading to true before starting the fetch
@@ -114,6 +85,35 @@ function App() {
     }
   };
 
+  const mint = async () => {
+    try {
+      setShowPopup(true);
+      setPopupContent({ message: 'Minting NFT...', showLoader: true });
+      const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
+      console.log(response.data);
+      const { transactionHash } = response.data;
+      setPopupContent({ message: `Minting success - transaction hash: ${transactionHash}`, showLoader: false });
+      getNFTs();
+    } catch (error) {
+      setPopupContent({ message: 'Error minting NFT. Please try again.', showLoader: false }); // Display error message
+      console.error('Error minting data:', error);
+    }
+  };
+
+  const transfer = async () => {
+    try {
+      setPopupContent({ message: 'Transferring NFT...', showLoader: true }); // Show transferring message with loader
+      const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
+      console.log(response.data);
+      const { transactionHash } = response.data;
+      setPopupContent({ message: `Transfer success - transaction hash: ${transactionHash}`, showLoader: false });
+      getNFTs();
+    } catch (error) {
+      setPopupContent({ message: 'Error transferring NFT. Please try again.', showLoader: false }); // Display error message
+      console.error('Error transferring NFT:', error);
+    }
+  };
+
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
     setPopupContent({ message: '', showLoader: false });
@@ -123,7 +123,7 @@ function App() {
   return (
     <div className="App">
       <div className="nft-page">
-        <div class="mint-header">
+        <div className="mint-header">
           <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
           <button className='pulse-orange-button' onClick={mint}>Mint</button>
         </div>
@@ -166,19 +166,18 @@ function App() {
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
-            {popupContent.message.includes('Minting') ? (
+            {popupContent.showLoader ? (
               <>
                 <p className="popup-content-message">{popupContent.message}</p>
-                {popupContent.showLoader && (
-                  <div className="lds-ripple"><div></div><div></div></div>
-                )}
-                {popupContent.message.includes('transaction hash') && (
-                  <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
-                )}
+                <div className="lds-ripple"><div></div><div></div></div>
+              </>
+            ) : popupContent.message.includes('transaction hash') ? (
+              <>
+                <p className="popup-content-message">{popupContent.message}</p>
+                <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
               </>
             ) : (
               <>
-
                 <p>Transfer NFT with id: {tokenId}</p>
                 <input
                   type="text"
@@ -195,7 +194,6 @@ function App() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
