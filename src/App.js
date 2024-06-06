@@ -7,6 +7,7 @@ function App() {
   const [tokenId, setTokenId] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [nfts, setNfts] = useState([]);
+  const [loading, setLoading] = useState(false); // Add loading state
   const [showPopup, setShowPopup] = useState(false);
 
   const getRarityDetails = (rarity) => {
@@ -72,6 +73,7 @@ function App() {
 
   const getNFTs = async () => {
     try {
+      setLoading(true); // Set loading to true before starting the fetch
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/getNFTs', { initData });
       console.log(response.data);
       const nftPromises = response.data.nfts[0].map(async (tokenId, index) => {
@@ -83,6 +85,8 @@ function App() {
       setNfts(nftData);
     } catch (error) {
       console.error('Error fetching NFTs:', error);
+    } finally {
+      setLoading(false); // Set loading to false after fetch is complete
     }
   };
 
@@ -103,8 +107,16 @@ function App() {
   return (
     <div className="App">
       <div className="nft-page">
-        <p className='glow-text'>Account Abstraction Magic</p>
-        <button className='pulse-orange-button' onClick={mint}>Mint</button>
+        <div class="mint-header">
+          <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
+          <button className='pulse-orange-button' onClick={mint}>Mint</button>
+        </div>
+        {loading && (
+          <div className="loading-overlay">
+            <p>Loading NFTs...</p>
+            <div className="lds-ripple"><div></div><div></div></div>
+          </div>
+        )}
         <div className="nft-container">
           {nfts.map((nft, index) => {
             const { name, image, attributes } = nft.metadata;
@@ -148,7 +160,7 @@ function App() {
             />
             <div>
               <button className='pulse-orange-button' onClick={transfer}>Send</button>
-            <button onClick={() => setShowPopup(false)}>Cancel</button>
+              <button onClick={() => setShowPopup(false)}>Cancel</button>
             </div>
           </div>
         </div>
