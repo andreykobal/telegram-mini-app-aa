@@ -9,6 +9,8 @@ function App() {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false); // Add loading state
   const [showPopup, setShowPopup] = useState(false);
+  const [popupContent, setPopupContent] = useState(''); // Add popup content state
+
 
   const getRarityDetails = (rarity) => {
     switch (rarity) {
@@ -54,14 +56,17 @@ function App() {
 
   const mint = async () => {
     try {
+      setShowPopup(true);
+      setPopupContent('Minting NFT...'); // Show minting message
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
       console.log(response.data);
       const { transactionHash } = response.data; // Extract the transaction hash from the response
-      alert(`Minting successful! Transaction hash: ${transactionHash}`); // Display the success message and transaction hash
+      setPopupContent(`Minting success - transaction hash: ${transactionHash}`); // Display success message and transaction hash
     } catch (error) {
       console.error('Error minting data:', error);
     }
   };
+
   
   const transfer = async () => {
     try {
@@ -152,18 +157,29 @@ function App() {
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Transfer NFT</h2>
-            <p>You are going to transfer NFT with id: {tokenId}</p>
-            <input
-              type="text"
-              placeholder="Enter wallet address"
-              value={toAddress}
-              onChange={(e) => setToAddress(e.target.value)}
-            />
-            <div>
-              <button className='pulse-orange-button' onClick={transfer}>Send</button>
-              <button onClick={() => setShowPopup(false)}>Cancel</button>
-            </div>
+            {popupContent.startsWith('Minting') ? (
+              <>
+                <p>{popupContent}</p>
+                {popupContent.includes('transaction hash') && (
+                  <button onClick={() => setShowPopup(false)}>Close</button>
+                )}
+              </>
+            ) : (
+              <>
+                <h2>Transfer NFT</h2>
+                <p>You are going to transfer NFT with id: {tokenId}</p>
+                <input
+                  type="text"
+                  placeholder="Enter wallet address"
+                  value={toAddress}
+                  onChange={(e) => setToAddress(e.target.value)}
+                />
+                <div>
+                  <button className='pulse-orange-button' onClick={transfer}>Send</button>
+                  <button onClick={() => setShowPopup(false)}>Cancel</button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
