@@ -5,7 +5,7 @@ const { privateKeyToAccount } = require("viem/accounts");
 const { sepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
 const { parseAbi, encodeFunctionData } = require("viem");
-const { get } = require("mongoose");
+
 
 const config = {
     biconomyPaymasterApiKey: "s2GjnlFeb.de9978aa-3c41-4912-a3cd-accd4c02a767",
@@ -98,7 +98,23 @@ async function transferNFT(privateKey, tokenId, toAddress) {
     }
 }
 
-async function getNFTs(walletAddress) {
+async function getNFTs(privateKey) {
+    const account = privateKeyToAccount(privateKey);
+    const client = createWalletClient({
+        account,
+        chain: sepolia,
+        transport: http(),
+    });
+
+    const smartWallet = await createSmartAccountClient({
+        signer: client,
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const saAddress = await smartWallet.getAccountAddress();
+    console.log("Smart Account Address:", saAddress);
+
     const publicClient = createPublicClient({
         chain: sepolia,
         transport: http()
@@ -110,10 +126,12 @@ async function getNFTs(walletAddress) {
             "function getOwnedNFTsByWallet(address wallet) public view returns (uint256[] memory, string[] memory)"
         ]),
         functionName: 'getOwnedNFTsByWallet',
-        args: [walletAddress],
+        args: [saAddress],
     });
 
     return data;
 }
 
+
 module.exports = { mint, transferNFT, getNFTs};
+
