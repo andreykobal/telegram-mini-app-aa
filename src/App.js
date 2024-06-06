@@ -7,6 +7,7 @@ function App() {
   const [tokenId, setTokenId] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [nfts, setNfts] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
 
   const getRarityDetails = (rarity) => {
     switch (rarity) {
@@ -63,6 +64,7 @@ function App() {
     try {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
       console.log(response.data);
+      setShowPopup(false); // Close the popup after transfer
     } catch (error) {
       console.error('Error transferring NFT:', error);
     }
@@ -93,26 +95,16 @@ function App() {
     }
   };
 
+  const openTransferPopup = (tokenId) => {
+    setTokenId(tokenId);
+    setShowPopup(true);
+  };
+
   return (
     <div className="App">
       <div className="nft-page">
         <p className='glow-text'>Account Abstraction Magic</p>
-        <button onClick={mint}>Mint</button>
-        <div>
-          <input
-            type="text"
-            placeholder="Token ID"
-            value={tokenId}
-            onChange={(e) => setTokenId(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Address"
-            value={toAddress}
-            onChange={(e) => setToAddress(e.target.value)}
-          />
-          <button onClick={transfer}>Transfer</button>
-        </div>
+        <button className='pulse-orange-button' onClick={mint}>Mint</button>
         <div className="nft-container">
           {nfts.map((nft, index) => {
             const { name, image, attributes } = nft.metadata;
@@ -133,7 +125,7 @@ function App() {
                         <p>{color}{label}</p>
                         <p>🪙{bonus.toLocaleString()}</p>
                       </div>
-                      <div className="nft-button-use">Transfer</div>
+                      <div className="nft-button-use" onClick={() => openTransferPopup(nft.tokenId)}>Transfer</div>
                     </div>
                   </div>
                 </div>
@@ -142,6 +134,25 @@ function App() {
           })}
         </div>
       </div>
+
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Transfer NFT</h2>
+            <p>You are going to transfer NFT with id: {tokenId}</p>
+            <input
+              type="text"
+              placeholder="Enter wallet address"
+              value={toAddress}
+              onChange={(e) => setToAddress(e.target.value)}
+            />
+            <div>
+              <button className='pulse-orange-button' onClick={transfer}>Send</button>
+            <button onClick={() => setShowPopup(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

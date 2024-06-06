@@ -394,3 +394,50 @@ button {
     filter: hue-rotate(360deg);
   }
 }
+
+
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: end;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  height: 50%;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-content button:nth-child(1) {
+  margin-right: 8px;
+}
+.popup-content button:nth-child(2) {
+      background: linear-gradient(180deg,
+            rgba(88, 85, 214, 1) 0%,
+            #38378A 100%);
+}
+
+.popup-content input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+}
+
