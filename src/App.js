@@ -48,7 +48,7 @@ function App() {
 
     const authenticateData = async () => {
       try {
-        const response = await axios.post('https://f1a07255bfc6.ngrok.app/authenticate', { initData });
+        const response = await axios.post('https://telegram-mini-app-aa-backend.azurewebsites.net/authenticate', { initData });
         console.log(response.data);
         getNFTs(); // Call getNFTs after successful authentication
       } catch (error) {
@@ -62,7 +62,7 @@ function App() {
   const getNFTs = async () => {
     try {
       setLoading(true); // Set loading to true before starting the fetch
-      const response = await axios.post('https://f1a07255bfc6.ngrok.app/getNFTs', { initData });
+      const response = await axios.post('https://telegram-mini-app-aa-backend.azurewebsites.net/getNFTs', { initData });
       console.log(response.data);
       const nftPromises = response.data.nfts[0].map(async (tokenId, index) => {
         const tokenUri = response.data.nfts[1][index];
@@ -93,7 +93,7 @@ function App() {
     try {
       setShowPopup(true);
       setPopupContent({ message: 'Minting NFT...', showLoader: true });
-      const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
+      const response = await axios.post('https://telegram-mini-app-aa-backend.azurewebsites.net/mint', { initData });
       console.log(response.data);
       const { transactionHash } = response.data;
       const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
@@ -111,7 +111,7 @@ function App() {
   const transfer = async () => {
     try {
       setPopupContent({ message: 'Transferring NFT...', showLoader: true }); // Show transferring message with loader
-      const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
+      const response = await axios.post('https://telegram-mini-app-aa-backend.azurewebsites.net/transfer', { initData, tokenId, toAddress });
       console.log(response.data);
       const { transactionHash } = response.data;
       const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
