@@ -75,8 +75,8 @@ async function getPrivateKeyFromKeyVault(secretName) {
     }
 }
 
-app.post('/validate', async (req, res) => {
-    console.log('Received request at /validate');
+app.post('/authenticate', async (req, res) => {
+    console.log('Received request at /authenticate');
     console.log('Request body:', req.body);
     const { initData } = req.body;
 
@@ -119,12 +119,44 @@ app.post('/validate', async (req, res) => {
                 }
             }
 
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-
             return res.status(200).json({ user });
         } catch (error) {
             console.error('Database error:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
+app.post('/mint', async (req, res) => {
+    console.log('Received request at /mint');
+    console.log('Request body:', req.body);
+    const { initData } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+
+            return res.status(200).json({ privateKey });
+        } catch (error) {
+            console.error('Error retrieving private key:', error);
             return res.status(500).send('Internal server error');
         }
     } else {
