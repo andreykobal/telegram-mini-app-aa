@@ -78,6 +78,8 @@ function App() {
     try {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });
       console.log(response.data);
+      const { transactionHash } = response.data; // Extract the transaction hash from the response
+      alert(`Transfer success - transaction hash: ${transactionHash}`); // Display success message and transaction hash
       setShowPopup(false); // Close the popup after transfer
     } catch (error) {
       console.error('Error transferring NFT:', error);

@@ -196,9 +196,9 @@ app.post('/transfer', async (req, res) => {
             const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
             console.log('Private Key:', privateKey);
             console.log('Transferring NFT...');
-            await transferNFT(privateKey, tokenId, toAddress);
+            const transactionHash = await transferNFT(privateKey, tokenId, toAddress);  // Capture the returned transaction hash
 
-            return res.status(200).json({ message: 'NFT transferred successfully' });
+            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
         } catch (error) {
             console.error('Error retrieving private key or transferring NFT:', error);
             return res.status(500).send('Internal server error');
@@ -208,6 +208,7 @@ app.post('/transfer', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
 
 app.post('/getNFTs', async (req, res) => {
     console.log('Received request at /getNFTs');

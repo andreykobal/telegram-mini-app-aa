@@ -101,7 +101,10 @@ async function transferNFT(privateKey, tokenId, toAddress) {
         console.log("UserOp receipt", userOpReceipt);
         console.log("Transaction receipt", userOpReceipt.receipt);
     }
+
+    return transactionHash;  // Return the transaction hash
 }
+
 
 async function getNFTs(privateKey) {
     const account = privateKeyToAccount(privateKey);
