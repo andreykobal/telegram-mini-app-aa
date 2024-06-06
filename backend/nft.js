@@ -14,12 +14,15 @@ const config = {
     tokenURI: "https://gateway.pinata.cloud/ipfs/QmRDS7eWPQv27RrCh5fKrjModK6GYTDCyL6qVf6615V7Hs" // Replace with actual token URI
 };
 
+const customRpcUrl = "https://eth-sepolia.g.alchemy.com/v2/3L47M5JRG9bMrBq90jM7LroN_m_99Dnw"; // Replace with your actual RPC URL
+
+
 async function mint(privateKey) {
     const account = privateKeyToAccount(privateKey);
     const client = createWalletClient({
         account,
         chain: sepolia,
-        transport: http(),
+        transport: http(customRpcUrl),
     });
 
     const smartWallet = await createSmartAccountClient({
@@ -61,7 +64,7 @@ async function transferNFT(privateKey, tokenId, toAddress) {
     const client = createWalletClient({
         account,
         chain: sepolia,
-        transport: http(),
+        transport: http(customRpcUrl),
     });
 
     const smartWallet = await createSmartAccountClient({
@@ -103,7 +106,7 @@ async function getNFTs(privateKey) {
     const client = createWalletClient({
         account,
         chain: sepolia,
-        transport: http(),
+        transport: http(customRpcUrl),
     });
 
     const smartWallet = await createSmartAccountClient({
@@ -117,7 +120,7 @@ async function getNFTs(privateKey) {
 
     const publicClient = createPublicClient({
         chain: sepolia,
-        transport: http()
+        transport: http(customRpcUrl)
     });
 
     const data = await publicClient.readContract({
