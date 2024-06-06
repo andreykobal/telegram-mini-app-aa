@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
+
 
 function App() {
   const [initData, setInitData] = useState('');
@@ -9,7 +11,8 @@ function App() {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(false); // Add loading state
   const [showPopup, setShowPopup] = useState(false);
-  const [popupContent, setPopupContent] = useState(''); // Add popup content state
+  const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
+
 
 
   const getRarityDetails = (rarity) => {
@@ -57,16 +60,17 @@ function App() {
   const mint = async () => {
     try {
       setShowPopup(true);
-      setPopupContent('Minting NFT...'); // Show minting message
+      setPopupContent({ message: 'Minting NFT...', showLoader: true }); // Show minting message with loader
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
       console.log(response.data);
       const { transactionHash } = response.data; // Extract the transaction hash from the response
-      setPopupContent(`Minting success - transaction hash: ${transactionHash}`); // Display success message and transaction hash
+      setPopupContent({ message: `Minting success - transaction hash: ${transactionHash}`, showLoader: false }); // Display success message and transaction hash
       getNFTs(); // Reload the NFTs list after minting success
     } catch (error) {
       console.error('Error minting data:', error);
     }
   };
+
 
 
   
@@ -110,7 +114,7 @@ function App() {
 
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
-    setPopupContent(''); 
+    setPopupContent({ message: '', showLoader: false });
     setShowPopup(true);
   };
 
@@ -160,17 +164,20 @@ function App() {
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
-            {popupContent.startsWith('Minting') ? (
+            {popupContent.message.includes('Minting') ? (
               <>
-                <p>{popupContent}</p>
-                {popupContent.includes('transaction hash') && (
-                  <button onClick={() => setShowPopup(false)}>Close</button>
+                <p className="popup-content-message">{popupContent.message}</p>
+                {popupContent.showLoader && (
+                  <div className="lds-ripple"><div></div><div></div></div>
+                )}
+                {popupContent.message.includes('transaction hash') && (
+                  <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
                 )}
               </>
             ) : (
               <>
-                <h2>Transfer NFT</h2>
-                <p>You are going to transfer NFT with id: {tokenId}</p>
+
+                <p>Transfer NFT with id: {tokenId}</p>
                 <input
                   type="text"
                   placeholder="Enter wallet address"
@@ -179,13 +186,14 @@ function App() {
                 />
                 <div>
                   <button className='pulse-orange-button' onClick={transfer}>Send</button>
-                  <button onClick={() => setShowPopup(false)}>Cancel</button>
+                  <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
     </div>
   );
 }

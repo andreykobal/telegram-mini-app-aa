@@ -429,6 +429,7 @@ button {
   align-items: center;
   justify-content: center;
   max-width: 100%;
+  position: relative;
 }
 
 .popup-content button:nth-child(1) {
@@ -447,7 +448,19 @@ button {
   border: none;
   border-radius: 4px;
 }
+.popup-content-message {
+  word-wrap: break-word;
+  max-width: calc(100% - 16px);
+}
 
+.popup-close-icon {
+  fill: white;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
 .mint-header {
   max-width: calc(100% - 16px);
   background-color: rgba(52, 51, 136, 0.5);
