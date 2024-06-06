@@ -1,9 +1,8 @@
 # 🪄 Welcome to Account Abstraction Magic! 🪄
 
-<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/53708f8e-4006-44e0-8f80-025cfecb9c67" width="512">
-
-
 A seamless experience for Telegram users!
+
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/53708f8e-4006-44e0-8f80-025cfecb9c67" width="512">
 
 ## Table of Contents
 
