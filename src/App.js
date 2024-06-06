@@ -56,11 +56,13 @@ function App() {
     try {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/mint', { initData });
       console.log(response.data);
+      const { transactionHash } = response.data; // Extract the transaction hash from the response
+      alert(`Minting successful! Transaction hash: ${transactionHash}`); // Display the success message and transaction hash
     } catch (error) {
       console.error('Error minting data:', error);
     }
   };
-
+  
   const transfer = async () => {
     try {
       const response = await axios.post('https://f1a07255bfc6.ngrok.app/transfer', { initData, tokenId, toAddress });

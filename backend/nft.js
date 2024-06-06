@@ -57,6 +57,8 @@ async function mint(privateKey) {
         console.log("UserOp receipt", userOpReceipt);
         console.log("Transaction receipt", userOpReceipt.receipt);
     }
+
+    return transactionHash;  // Return the transaction hash
 }
 
 async function transferNFT(privateKey, tokenId, toAddress) {

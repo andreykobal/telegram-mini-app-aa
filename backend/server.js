@@ -158,11 +158,11 @@ app.post('/mint', async (req, res) => {
             const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
             console.log('Private Key:', privateKey);
             console.log('Minting NFT...');
-            mint(privateKey).catch(console.error);
+            const transactionHash = await mint(privateKey);  // Capture the returned transaction hash
 
-            return res.status(200).json({ privateKey });
+            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
         } catch (error) {
-            console.error('Error retrieving private key:', error);
+            console.error('Error retrieving private key or minting NFT:', error);
             return res.status(500).send('Internal server error');
         }
     } else {
@@ -170,6 +170,7 @@ app.post('/mint', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
 
 app.post('/transfer', async (req, res) => {
     console.log('Received request at /transfer');
