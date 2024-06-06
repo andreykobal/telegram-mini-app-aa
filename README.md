@@ -1,6 +1,7 @@
 # 🪄 Welcome to Account Abstraction Magic! 🪄
 
-![telegram-magic](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/53708f8e-4006-44e0-8f80-025cfecb9c67)
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/53708f8e-4006-44e0-8f80-025cfecb9c67" style="max-width: 256px;">
+
 
 A seamless experience for Telegram users!
 
@@ -31,10 +32,10 @@ A seamless experience for Telegram users!
 
 ## Screenshots
 
-![photo_2024-06-06 23 40 21](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/011d5df4-f328-47b0-98aa-bd7b9fdd7d8a)
-![photo_2024-06-06 23 40 22](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/733b1364-fd62-4089-b856-e28979dbbf9d)
-![photo_2024-06-06 23 40 22 (1)](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/8c46c8fa-4311-4d90-8822-3f31ea52bdb5)
-![photo_2024-06-06 23 40 22 (2)](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/71d2f2c2-dbdf-4516-a5de-d147f5131205)
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/011d5df4-f328-47b0-98aa-bd7b9fdd7d8a" style="max-width: 256px;">
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/733b1364-fd62-4089-b856-e28979dbbf9d" style="max-width: 256px;">
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/8c46c8fa-4311-4d90-8822-3f31ea52bdb5" style="max-width: 256px;">
+<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/71d2f2c2-dbdf-4516-a5de-d147f5131205" style="max-width: 256px;">
 
 
 
