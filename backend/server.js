@@ -1,3 +1,5 @@
+//server.js
+
 const { privateKeyToAccount, generatePrivateKey } = require('viem/accounts')
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -8,6 +10,8 @@ const User = require('./models/User'); // Import the User model
 const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
+const { mint } = require("./mint-nft");
+
 
 const app = express();
 const port = 5001;
@@ -153,6 +157,8 @@ app.post('/mint', async (req, res) => {
         try {
             const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
             console.log('Private Key:', privateKey);
+            console.log('Minting NFT...');
+            mint(privateKey).catch(console.error);
 
             return res.status(200).json({ privateKey });
         } catch (error) {
