@@ -35,17 +35,16 @@ A seamless experience for Telegram users!
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/yourusername/yourrepository.git
+   git clone https://github.com/andreykobal/telegram-mini-app-aa.git
    ```
 
 2. Navigate to the project directory:
    ```sh
-   cd yourrepository
+   cd telegram-mini-app-aa
    ```
 
 3. Install dependencies for the frontend:
    ```sh
-   cd frontend
    npm install
    ```
 
@@ -65,7 +64,7 @@ A seamless experience for Telegram users!
 
 2. Start the frontend application:
    ```sh
-   cd ../frontend
+   cd ..
    npm start
    ```
 
