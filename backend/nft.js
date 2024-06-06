@@ -2,26 +2,26 @@
 
 const {createPublicClient, createWalletClient, http } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
-const { sepolia } = require("viem/chains");
+const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
 const { parseAbi, encodeFunctionData } = require("viem");
 
 
 const config = {
-    biconomyPaymasterApiKey: "s2GjnlFeb.de9978aa-3c41-4912-a3cd-accd4c02a767",
-    bundlerUrl: "https://bundler.biconomy.io/api/v2/11155111/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44",
-    nftAddress: "0x5dA076A7a10560E0d597E131489fDd0Dc28c7951",
+    biconomyPaymasterApiKey: "YOUR_PAYMASTER_API_KEY",
+    bundlerUrl: "YOUR_BUNDLER_URL",
+    nftAddress: "YOUR_CONTRACT_ADDRESS",
     tokenURI: "https://gateway.pinata.cloud/ipfs/QmRDS7eWPQv27RrCh5fKrjModK6GYTDCyL6qVf6615V7Hs" // Replace with actual token URI
 };
 
-const customRpcUrl = "https://eth-sepolia.g.alchemy.com/v2/3L47M5JRG9bMrBq90jM7LroN_m_99Dnw"; // Replace with your actual RPC URL
+const customRpcUrl = "https://base-sepolia.g.alchemy.com/v2/KxQa-WOPTgk_XOZXstj9MaOVs1BxXQVh"; // Replace with your actual RPC URL
 
 
 async function mint(privateKey) {
     const account = privateKeyToAccount(privateKey);
     const client = createWalletClient({
         account,
-        chain: sepolia,
+        chain: baseSepolia,
         transport: http(customRpcUrl),
     });
 
@@ -65,7 +65,7 @@ async function transferNFT(privateKey, tokenId, toAddress) {
     const account = privateKeyToAccount(privateKey);
     const client = createWalletClient({
         account,
-        chain: sepolia,
+        chain: baseSepolia,
         transport: http(customRpcUrl),
     });
 
@@ -107,7 +107,7 @@ async function getNFTs(privateKey) {
     const account = privateKeyToAccount(privateKey);
     const client = createWalletClient({
         account,
-        chain: sepolia,
+        chain: baseSepolia,
         transport: http(customRpcUrl),
     });
 
@@ -121,7 +121,7 @@ async function getNFTs(privateKey) {
     console.log("Smart Account Address:", saAddress);
 
     const publicClient = createPublicClient({
-        chain: sepolia,
+        chain: baseSepolia,
         transport: http(customRpcUrl)
     });
 

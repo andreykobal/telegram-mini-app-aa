@@ -62,10 +62,12 @@ function App() {
       console.log(response.data);
       const { transactionHash } = response.data; // Extract the transaction hash from the response
       setPopupContent(`Minting success - transaction hash: ${transactionHash}`); // Display success message and transaction hash
+      getNFTs(); // Reload the NFTs list after minting success
     } catch (error) {
       console.error('Error minting data:', error);
     }
   };
+
 
   
   const transfer = async () => {
@@ -108,6 +110,7 @@ function App() {
 
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
+    setPopupContent(''); 
     setShowPopup(true);
   };
 
