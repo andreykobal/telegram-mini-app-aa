@@ -17,7 +17,7 @@ const config = {
 const customRpcUrl = "https://base-sepolia.g.alchemy.com/v2/KxQa-WOPTgk_XOZXstj9MaOVs1BxXQVh"; // Replace with your actual RPC URL
 
 
-async function mint(privateKey) {
+async function mint(privateKey, tokenURI) {
     const account = privateKeyToAccount(privateKey);
     const client = createWalletClient({
         account,
@@ -37,7 +37,7 @@ async function mint(privateKey) {
     const encodedCall = encodeFunctionData({
         abi: parseAbi(["function createToken(string memory tokenURI) public returns (uint)"]),
         functionName: "createToken",
-        args: [config.tokenURI],
+        args: [tokenURI],  // Use the provided token URI
     });
 
     const transaction = {
@@ -60,6 +60,7 @@ async function mint(privateKey) {
 
     return transactionHash;  // Return the transaction hash
 }
+
 
 async function transferNFT(privateKey, tokenId, toAddress) {
     const account = privateKeyToAccount(privateKey);

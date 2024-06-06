@@ -11,6 +11,10 @@ const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
 const { mint, transferNFT, getNFTs } = require("./nft"); 
+const fs = require('fs');
+const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
+const MetadataIndex = require('./models/MetadataIndex'); // Import the MetadataIndex model
+
 
 
 const app = express();
@@ -134,6 +138,17 @@ app.post('/authenticate', async (req, res) => {
     }
 });
 
+async function getTokenURI() {
+    const indexDoc = await MetadataIndex.findOneAndUpdate(
+        {},
+        { $inc: { currentIndex: 1 } },
+        { new: true, upsert: true }
+    );
+    const currentIndex = indexDoc.currentIndex % metadata.urls.length;
+    return metadata.urls[currentIndex];
+}
+
+
 app.post('/mint', async (req, res) => {
     console.log('Received request at /mint');
     console.log('Request body:', req.body);
@@ -156,11 +171,12 @@ app.post('/mint', async (req, res) => {
 
         try {
             const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            const tokenURI = await getTokenURI();  // Get the next token URI
             console.log('Private Key:', privateKey);
-            console.log('Minting NFT...');
-            const transactionHash = await mint(privateKey);  // Capture the returned transaction hash
+            console.log('Minting NFT with Token URI:', tokenURI);
+            const transactionHash = await mint(privateKey, tokenURI);  // Pass the token URI to the mint function
 
-            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
+            return res.status(200).json({ transactionHash });
         } catch (error) {
             console.error('Error retrieving private key or minting NFT:', error);
             return res.status(500).send('Internal server error');
@@ -170,6 +186,7 @@ app.post('/mint', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
 
 
 app.post('/transfer', async (req, res) => {
