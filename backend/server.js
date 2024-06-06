@@ -10,7 +10,7 @@ const User = require('./models/User'); // Import the User model
 const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
-const { mint, transferNFT } = require("./nft");
+const { mint, transferNFT, getNFTs } = require("./nft"); 
 
 
 const app = express();
@@ -207,6 +207,50 @@ app.post('/transfer', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
+app.post('/getNFTs', async (req, res) => {
+    console.log('Received request at /getNFTs');
+    console.log('Request body:', req.body);
+    const { initData } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+            console.log('Retrieving NFTs...');
+            const data = await getNFTs(privateKey);
+
+            // Convert BigInt to string before sending JSON response
+            const nfts = [
+                data[0].map(id => id.toString()),
+                data[1]
+            ];
+
+            return res.status(200).json({ nfts });
+        } catch (error) {
+            console.error('Error retrieving private key or NFTs:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
 
 app.use('/webhook', webhookRouter);
 

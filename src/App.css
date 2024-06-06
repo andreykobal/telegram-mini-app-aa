@@ -1,38 +1,382 @@
+/* Cleaned App.css */
+body,
+html {
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  background-color: black;
+}
+
 .App {
+  background: rgb(14, 13, 36);
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+  color: white;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+.header-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  margin: 0 8px;
+}
+
+.header-icon-button {
+  background-color: rgba(52, 51, 136, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.header-icon-svg {
+  fill: white;
+  width: 24px;
+  height: 24px;
+}
+
+h1 {
+  font-family: "Roboto", sans-serif;
+  font-size: 50px;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+h2 {
+  margin: 0;
+}
+
+p {
+  font-size: 16px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+button {
+  background: linear-gradient(to bottom, #FF9502 0%, #FF4C03 100%);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 32px;
+  width: 100px;
+  cursor: pointer;
   color: white;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.App-link {
-  color: #61dafb;
+.pulse-orange-button {
+  animation: pulse-orange 2s infinite;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes pulse-orange {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 149, 2, 0.7);
   }
-  to {
-    transform: rotate(360deg);
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(255, 121, 63, 0);
   }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 121, 63, 0);
+  }
+}
+
+.BackgroundImage0 {
+  background-image: url('https://bot.ethernity.game/new-bg.jpg');
+}
+
+.bg-blur {
+  background-color: #12122cd5;
+  backdrop-filter: blur(5px);
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.nft-page {
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.nft-container {
+  padding: 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.nft-card {
+  width: calc(50% - 8px);
+  min-height: 256px;
+  box-sizing: border-box;
+}
+
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  border-radius: 8px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  border-radius: 6px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-front {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  opacity: 1;
+  transition: opacity 0.8s;
+}
+
+.flip-card.flipped .flip-card-front {
+  opacity: 0;
+}
+
+.flip-card-back {
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  color: white;
+  transform: rotateY(180deg);
+}
+
+.nft-attributes-wrapper {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.nft-attributes {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: left;
+  text-align: left;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+}
+
+.nft-attributes p {
+  font-size: 12px;
+  line-height: 14px;
+  width: auto;
+  margin: 2px 0;
+}
+
+.nft-attributes p:first-child {
+  text-align: center;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.flip-card-inner.legendary {
+  border: 2px solid #FF9502;
+  box-shadow: 0 0 4px #FF9502;
+}
+
+.flip-card-inner.mythical {
+  border: 2px solid #FF4C03;
+  box-shadow: 0 0 4px #FF4C03;
+}
+
+.flip-card-inner.epic {
+  border: 2px solid rgba(88, 85, 214, 1);
+  box-shadow: 0 0 4px rgba(88, 85, 214, 1);
+}
+
+.flip-card-inner.rare {
+  border: 2px solid #007AFF;
+  box-shadow: 0 0 4px #007AFF;
+}
+
+.flip-card-inner.uncommon {
+  border: 2px solid #4cd964;
+  box-shadow: 0 0 4px #4cd964;
+}
+
+.flip-card-inner.unknown {
+  border: 2px solid #ccc;
+  box-shadow: 0 0 4px #ccc;
+}
+
+.nft-card-header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 32px;
+}
+
+.nft-card-header p {
+  font-size: 12px;
+  backdrop-filter: blur(5px);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: auto;
+}
+
+.sell-opensea,
+.burn-nft {
+  width: 24px;
+  height: 24px;
+  margin: 4px;
+  background: #FF4C03;
+  backdrop-filter: blur(5px);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.nft-button-use {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  width: 100%;
+  background: linear-gradient(360deg, rgb(42, 41, 96) 0%, #38378A 100%);
+  padding: 8px 0;
+}
+
+.nft-button-use.equipped {
+  background: linear-gradient(to bottom, #FF9502 0%, #FF4C03 100%);
+}
+
+.nft-card-body {
+  width: 100%;
+}
+
+.nft-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.nft-info p {
+  font-size: 10px;
+  backdrop-filter: blur(5px);
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.nft-card.no-overflow {
+  position: relative;
+  overflow: visible;
+}
+
+.nft-card-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: calc(100% + 4px);
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-top: 4px solid rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  border-radius: 8px;
+}
+
+.nft-help-container {
+  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(52, 51, 136, 0.5);
+  margin: 8px;
+  margin-bottom: 64px;
+  padding: 16px 0;
+  border-radius: 8px;
+}
+
+.nft-help-container-text {
+  text-align: left;
+}
+
+.nft-help-container p {
+  font-size: 14px;
+  display: inline-block;
+}
+
+.nft-help-container h2 {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  font-size: 28px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+.time-counter {
+  font-size: 16px;
+}
+
+.time-counter>span {
+  display: inline-block;
+  margin: 0 2px;
 }
