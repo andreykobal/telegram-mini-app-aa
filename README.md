@@ -1,4 +1,4 @@
-# 🪄 Welcome to Account Abstraction Magic! 🪄
+# 🪄 Welcome to Telegram Mini App Account Abstraction Magic! 🪄
 
 A seamless experience for Telegram users!
 
