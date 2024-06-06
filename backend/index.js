@@ -18,7 +18,7 @@ const MetadataIndex = require('./models/MetadataIndex'); // Import the MetadataI
 
 
 const app = express();
-const port = 5001;
+const port = process.env.PORT || 5001;
 
 const BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
 const SECRET_KEY = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
