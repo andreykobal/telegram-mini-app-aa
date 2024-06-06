@@ -144,9 +144,16 @@ async function getTokenURI() {
         { $inc: { currentIndex: 1 } },
         { new: true, upsert: true }
     );
-    const currentIndex = indexDoc.currentIndex % metadata.urls.length;
-    return metadata.urls[currentIndex];
+
+    // Reset the index if it exceeds the length of the metadata URLs
+    if (indexDoc.currentIndex >= metadata.urls.length) {
+        indexDoc.currentIndex = 0;
+        await indexDoc.save();
+    }
+
+    return metadata.urls[indexDoc.currentIndex];
 }
+
 
 
 app.post('/mint', async (req, res) => {

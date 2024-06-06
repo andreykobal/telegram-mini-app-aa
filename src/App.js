@@ -69,7 +69,8 @@ function App() {
         const metadata = await fetchMetadata(updatePinataUrl(tokenUri));
         return { tokenId, metadata };
       });
-      const nftData = await Promise.all(nftPromises);
+      let nftData = await Promise.all(nftPromises);
+      nftData = nftData.sort((a, b) => b.tokenId - a.tokenId); // Sort NFTs in descending order by tokenId
       setNfts(nftData);
     } catch (error) {
       console.error('Error fetching NFTs:', error);
@@ -77,6 +78,7 @@ function App() {
       setLoading(false); // Set loading to false after fetch is complete
     }
   };
+
 
   const fetchMetadata = async (url) => {
     try {
