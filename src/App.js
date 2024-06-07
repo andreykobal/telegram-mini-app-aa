@@ -169,7 +169,7 @@ function App() {
                       <div className="sell-opensea-blank">
                       </div>
                       <p>{name}</p>
-                      <div className="sell-opensea" onClick={() => window.open(`https://testnets.opensea.io/assets/base-sepolia/YOUR_CONTRACT_ADDRESS/${nft.tokenId}/`, '_blank')}>
+                      <div className="sell-opensea" onClick={() => window.open(`https://testnets.opensea.io/assets/base-sepolia/0xa4aae0C5C5B86A5d388d50377ccf0060A6bFbf1f/${nft.tokenId}/`, '_blank')}>
                         <LogoMark className='logo-opensea' />
                       </div>
                     </div>
