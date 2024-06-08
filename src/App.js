@@ -129,6 +129,17 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (walletAddress) {
+      const interval = setInterval(async () => {
+        const balance = await getWalletBalance(walletAddress);
+        setWalletBalance(balance);
+      }, 1500); // 30000 milliseconds = 30 seconds
+
+      return () => clearInterval(interval); // Cleanup interval on component unmount
+    }
+  }, [walletAddress]);
+
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
     setPopupContent({ message: '', showLoader: false });
