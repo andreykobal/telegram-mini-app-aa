@@ -3,9 +3,12 @@ const axios = require('axios');
 
 const router = express.Router();
 
-const BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
+require('dotenv').config();
+
+
+const BOT_TOKEN = process.env.BOT_TOKEN;
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const WEBHOOK_URL = `https://f1a07255bfc6.ngrok.app/webhook`; // Replace with your actual webhook URL
+const WEBHOOK_URL = `${process.env.WEBHOOK_URL}/webhook`; // Replace with your actual webhook URL
 
 router.post('/', async (req, res) => {
     console.log('Received webhook');
@@ -19,7 +22,7 @@ router.post('/', async (req, res) => {
                 {
                     text: 'OPEN APP 🚀',
                     web_app: {
-                        url: 'https://dc26e00cbe0c.ngrok.app'
+                        url: process.env.WEB_APP_URL
                     }
                 }
             ]]

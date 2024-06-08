@@ -13,17 +13,20 @@ const { SecretClient } = require('@azure/keyvault-secrets');
 const { mint, transferNFT, getNFTs } = require("./nft"); 
 const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
-const MetadataIndex = require('./models/MetadataIndex'); // Import the MetadataIndex model
+const MetadataIndex = require('./models/MetadataIndex'); 
+
+require('dotenv').config();
+
 
 
 
 const app = express();
 const port = process.env.PORT || 5001;
 
-const BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
+const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
 
-const uri = "YOUR_MONGODB_URL";
+const uri = process.env.MONGODB_URI;
 
 // Azure Key Vault configuration
 const keyVaultName = "aa-testnet";

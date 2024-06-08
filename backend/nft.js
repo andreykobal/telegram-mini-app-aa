@@ -6,15 +6,15 @@ const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
 const { parseAbi, encodeFunctionData } = require("viem");
 
+require('dotenv').config();
 
 const config = {
-    biconomyPaymasterApiKey: "YOUR_PAYMASTER_API_KEY",
-    bundlerUrl: "YOUR_BUNDLER_URL",
-    nftAddress: "YOUR_CONTRACT_ADDRESS",
-    tokenURI: "https://gateway.pinata.cloud/ipfs/QmRDS7eWPQv27RrCh5fKrjModK6GYTDCyL6qVf6615V7Hs" // Replace with actual token URI
+    biconomyPaymasterApiKey: process.env.BICONOMY_PAYMASTER_API_KEY,
+    bundlerUrl: process.env.BUNDLER_URL,
+    nftAddress: process.env.NFT_ADDRESS
 };
 
-const customRpcUrl = "https://base-sepolia.g.alchemy.com/v2/KxQa-WOPTgk_XOZXstj9MaOVs1BxXQVh"; // Replace with your actual RPC URL
+const customRpcUrl = process.env.CUSTOM_RPC_URL;
 
 
 async function mint(privateKey, tokenURI) {
