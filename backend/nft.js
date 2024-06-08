@@ -1,4 +1,4 @@
-// nft.js
+//backend/nft.js
 
 const {createPublicClient, createWalletClient, http } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
@@ -34,6 +34,40 @@ async function getSmartWalletAddress(privateKey) {
     return saAddress;  // Return the smart wallet address
 }
 
+async function sendETH(privateKey, toAddress, amount) {
+    const account = privateKeyToAccount(privateKey);
+    const client = createWalletClient({
+        account,
+        chain: baseSepolia,
+        transport: http(customRpcUrl),
+    });
+
+    const smartWallet = await createSmartAccountClient({
+        signer: client,
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const transaction = {
+        to: toAddress,
+        value: BigInt(amount * 10 ** 18), // Convert ETH to Wei
+    };
+
+    const userOpResponse = await smartWallet.sendTransaction(transaction, {
+        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+    });
+
+    const { transactionHash } = await userOpResponse.waitForTxHash();
+    console.log("Transaction Hash:", transactionHash);
+
+    const userOpReceipt = await userOpResponse.wait();
+    if (userOpReceipt.success == 'true') {
+        console.log("UserOp receipt", userOpReceipt);
+        console.log("Transaction receipt", userOpReceipt.receipt);
+    }
+
+    return transactionHash;  // Return the transaction hash
+}
 
 async function mint(privateKey, tokenURI) {
     const account = privateKeyToAccount(privateKey);
@@ -160,5 +194,4 @@ async function getNFTs(privateKey) {
 }
 
 
-module.exports = { mint, transferNFT, getNFTs, getSmartWalletAddress };
-
+module.exports = { mint, transferNFT, getNFTs, getSmartWalletAddress, sendETH };

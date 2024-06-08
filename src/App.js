@@ -14,7 +14,9 @@ function App() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
   const [walletAddress, setWalletAddress] = useState('');
-  const [walletBalance, setWalletBalance] = useState(''); // Add state for wallet balance
+  const [walletBalance, setWalletBalance] = useState('');
+  const [amount, setAmount] = useState('');
+
 
   const getRarityDetails = (rarity) => {
     switch (rarity) {
@@ -133,6 +135,31 @@ function App() {
     setShowPopup(true);
   };
 
+  const sendEth = async (amount, toAddress) => {
+    try {
+      setPopupContent({ message: 'Sending ETH...', showLoader: true });
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/sendETH`, { initData, toAddress, amount });
+      const { transactionHash } = response.data;
+      const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
+      setPopupContent({
+        message: `Transaction successful - transaction hash: <a href="${txLink}" class="orange" target="_blank" rel="noopener noreferrer">${transactionHash}</a>`,
+        showLoader: false
+      });
+      const balance = await getWalletBalance(walletAddress); // Fetch wallet balance after sending ETH
+      setWalletBalance(balance); // Update the wallet balance
+    } catch (error) {
+      setPopupContent({ message: 'Error sending ETH. Please try again.', showLoader: false });
+      console.error('Error sending ETH:', error);
+    }
+  };
+
+
+
+  const openSendEthPopup = () => {
+    setPopupContent({ message: '', showLoader: false });
+    setShowPopup(true);
+  };
+
   useEffect(() => {
     if (showPopup) {
       document.body.style.overflow = 'hidden';
@@ -149,6 +176,7 @@ function App() {
           <p>Wallet address:</p>
           <p className="wallet-address">{walletAddress}</p>
           <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
+          <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
           <button className='pulse-orange-button' onClick={mint}>Mint</button>
         </div>
         {loading && (
@@ -207,15 +235,21 @@ function App() {
               </>
             ) : (
               <>
-                <p>Transfer NFT with id: {tokenId}</p>
+                <p>Send ETH</p>
                 <input
                   type="text"
-                  placeholder="Enter wallet address"
+                  placeholder="Enter amount in ETH"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Enter recipient address"
                   value={toAddress}
                   onChange={(e) => setToAddress(e.target.value)}
                 />
                 <div>
-                  <button className='pulse-orange-button' onClick={transfer}>Send</button>
+                  <button className='pulse-orange-button' onClick={() => sendEth(amount, toAddress)}>Send</button>
                   <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
                 </div>
               </>
@@ -223,6 +257,7 @@ function App() {
           </div>
         </div>
       )}
+
 
     </div>
   );

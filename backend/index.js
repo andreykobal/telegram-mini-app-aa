@@ -10,7 +10,7 @@ const User = require('./models/User'); // Import the User model
 const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
-const { mint, transferNFT, getNFTs, getSmartWalletAddress} = require("./nft"); 
+const { mint, transferNFT, getNFTs, getSmartWalletAddress, sendETH} = require("./nft"); 
 const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const MetadataIndex = require('./models/MetadataIndex'); 
@@ -141,6 +141,44 @@ app.post('/authenticate', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
+app.post('/sendETH', async (req, res) => {
+    console.log('Received request at /sendETH');
+    console.log('Request body:', req.body);
+    const { initData, toAddress, amount } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+            console.log('Sending ETH...');
+            const transactionHash = await sendETH(privateKey, toAddress, amount);  // Capture the returned transaction hash
+
+            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
+        } catch (error) {
+            console.error('Error retrieving private key or sending ETH:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
 
 async function getTokenURI() {
     const indexDoc = await MetadataIndex.findOneAndUpdate(
