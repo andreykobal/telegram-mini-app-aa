@@ -16,6 +16,24 @@ const config = {
 
 const customRpcUrl = process.env.CUSTOM_RPC_URL;
 
+async function getSmartWalletAddress(privateKey) {
+    const account = privateKeyToAccount(privateKey);
+    const client = createWalletClient({
+        account,
+        chain: baseSepolia,
+        transport: http(customRpcUrl),
+    });
+
+    const smartWallet = await createSmartAccountClient({
+        signer: client,
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const saAddress = await smartWallet.getAccountAddress();
+    return saAddress;  // Return the smart wallet address
+}
+
 
 async function mint(privateKey, tokenURI) {
     const account = privateKeyToAccount(privateKey);
@@ -142,5 +160,5 @@ async function getNFTs(privateKey) {
 }
 
 
-module.exports = { mint, transferNFT, getNFTs};
+module.exports = { mint, transferNFT, getNFTs, getSmartWalletAddress };
 

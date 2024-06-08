@@ -3,19 +3,18 @@ import axios from 'axios';
 import './App.css';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
-
-
+import { getWalletBalance } from './balance'; // Import the balance fetching function
 
 function App() {
   const [initData, setInitData] = useState('');
   const [tokenId, setTokenId] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [nfts, setNfts] = useState([]);
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
-
-
+  const [walletAddress, setWalletAddress] = useState('');
+  const [walletBalance, setWalletBalance] = useState(''); // Add state for wallet balance
 
   const getRarityDetails = (rarity) => {
     switch (rarity) {
@@ -50,7 +49,10 @@ function App() {
       try {
         const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/authenticate`, { initData });
         console.log(response.data);
-        getNFTs(); // Call getNFTs after successful authentication
+        setWalletAddress(response.data.user.walletAddress);
+        getNFTs();
+        const balance = await getWalletBalance(response.data.user.walletAddress); // Fetch wallet balance
+        setWalletBalance(balance); // Set the fetched balance
       } catch (error) {
         console.error('Error validating data:', error);
       }
@@ -61,7 +63,7 @@ function App() {
 
   const getNFTs = async () => {
     try {
-      setLoading(true); // Set loading to true before starting the fetch
+      setLoading(true);
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getNFTs`, { initData });
       console.log(response.data);
       const nftPromises = response.data.nfts[0].map(async (tokenId, index) => {
@@ -70,15 +72,14 @@ function App() {
         return { tokenId, metadata };
       });
       let nftData = await Promise.all(nftPromises);
-      nftData = nftData.sort((a, b) => b.tokenId - a.tokenId); // Sort NFTs in descending order by tokenId
+      nftData = nftData.sort((a, b) => b.tokenId - a.tokenId);
       setNfts(nftData);
     } catch (error) {
       console.error('Error fetching NFTs:', error);
     } finally {
-      setLoading(false); // Set loading to false after fetch is complete
+      setLoading(false);
     }
   };
-
 
   const fetchMetadata = async (url) => {
     try {
@@ -103,14 +104,14 @@ function App() {
       });
       getNFTs();
     } catch (error) {
-      setPopupContent({ message: 'Error minting NFT. Please try again.', showLoader: false }); // Display error message
+      setPopupContent({ message: 'Error minting NFT. Please try again.', showLoader: false });
       console.error('Error minting data:', error);
     }
   };
 
   const transfer = async () => {
     try {
-      setPopupContent({ message: 'Transferring NFT...', showLoader: true }); // Show transferring message with loader
+      setPopupContent({ message: 'Transferring NFT...', showLoader: true });
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transfer`, { initData, tokenId, toAddress });
       console.log(response.data);
       const { transactionHash } = response.data;
@@ -121,11 +122,10 @@ function App() {
       });
       getNFTs();
     } catch (error) {
-      setPopupContent({ message: 'Error transferring NFT. Please try again.', showLoader: false }); // Display error message
+      setPopupContent({ message: 'Error transferring NFT. Please try again.', showLoader: false });
       console.error('Error transferring NFT:', error);
     }
   };
-
 
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
@@ -146,6 +146,9 @@ function App() {
       <div className="nft-page">
         <div className="mint-header">
           <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
+          <p>Wallet address:</p>
+          <p className="wallet-address">{walletAddress}</p>
+          <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
           <button className='pulse-orange-button' onClick={mint}>Mint</button>
         </div>
         {loading && (

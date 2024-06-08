@@ -561,3 +561,6 @@ button {
 .orange {
   color: #FF9502;
 }
+.wallet-address {
+  font-size: 10px;
+}

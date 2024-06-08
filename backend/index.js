@@ -1,6 +1,6 @@
-//server.js
+//backend/index.js
 
-const { privateKeyToAccount, generatePrivateKey } = require('viem/accounts')
+const { generatePrivateKey } = require('viem/accounts')
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
@@ -10,7 +10,7 @@ const User = require('./models/User'); // Import the User model
 const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
-const { mint, transferNFT, getNFTs } = require("./nft"); 
+const { mint, transferNFT, getNFTs, getSmartWalletAddress} = require("./nft"); 
 const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const MetadataIndex = require('./models/MetadataIndex'); 
@@ -110,10 +110,10 @@ app.post('/authenticate', async (req, res) => {
             let user = await User.findOne({ telegramId });
             if (!user) {
                 const privateKey = generatePrivateKey();
-                const account = privateKeyToAccount(privateKey);
+                const smartWalletAddress = await getSmartWalletAddress(privateKey);
                 user = new User({
                     telegramId,
-                    walletAddress: account.address
+                    walletAddress: smartWalletAddress
                 });
                 await user.save();
                 await storePrivateKeyInKeyVault(telegramId, privateKey);
@@ -122,14 +122,15 @@ app.post('/authenticate', async (req, res) => {
                 console.log('User found:', user);
                 if (!user.walletAddress) {
                     const privateKey = generatePrivateKey();
-                    const account = privateKeyToAccount(privateKey);
-                    user.walletAddress = account.address;
+                    const smartWalletAddress = await getSmartWalletAddress(privateKey);
+                    user.walletAddress = smartWalletAddress;
                     await user.save();
                     await storePrivateKeyInKeyVault(telegramId, privateKey);
                     console.log('Updated user with wallet:', user);
                 }
             }
 
+            console.log('User authenticated:', user);
             return res.status(200).json({ user });
         } catch (error) {
             console.error('Database error:', error);
