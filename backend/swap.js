@@ -142,6 +142,23 @@ async function approveToken(tokenAddress, spenderAddress, amount, smartWallet) {
     return transactionHash;
 }
 
+// Function to get the swap rate
+async function getSwapRate(amountIn, path) {
+    const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http(customRpcUrl)
+    });
+
+    const amountsOut = await publicClient.readContract({
+        address: ROUTER_ADDRESS,
+        abi: routerArtifact.abi,
+        functionName: 'getAmountsOut',
+        args: [amountIn, path]
+    });
+
+    return amountsOut;
+}
+
 // Function to swap tokens on Uniswap
 async function swapTokens(amountIn, amountOutMin, path, to, deadline, smartWallet) {
     const encodedCall = encodeFunctionData({
@@ -172,7 +189,7 @@ async function swapTokens(amountIn, amountOutMin, path, to, deadline, smartWalle
 }
 
 // Exporting functions for external use
-module.exports = { getSmartWalletAddress, getEthBalance, getTokenBalance, approveToken, swapTokens };
+module.exports = { getSmartWalletAddress, getEthBalance, getTokenBalance, approveToken, swapTokens, getSwapRate };
 
 // Example usage
 async function main() {
@@ -200,8 +217,14 @@ async function main() {
     });
 
     const amountIn = parseUnits('1', 18); // Amount of USDT to swap
-    const amountOutMin = 0; // Minimum amount of USDC to receive
     const path = [USDT_ADDRESS, USDC_ADDRESS]; // Swap path
+
+    // Get the swap rate
+    const amountsOut = await getSwapRate(amountIn, path);
+    const amountOutMin = amountsOut[1]; // Minimum amount of USDC to receive
+
+    console.log(`Swap Rate: 1 USDT = ${amountOutMin.toString()} USDC`);
+
     const to = smartWalletAddress; // Recipient address
     const deadline = Math.floor(Date.now() / 1000) + 60 * 10; // Transaction deadline
 
