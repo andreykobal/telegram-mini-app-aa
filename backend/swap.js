@@ -300,6 +300,73 @@ async function swapWethToUsdt(privateKey, amountInWeth) {
     return transactionHash;
 }
 
+// New function to swap USDT to WETH
+async function swapUsdtToWeth(privateKey, amountInUsdt) {
+    const account = privateKeyToAccount(privateKey);
+    const smartWallet = await createSmartAccountClient({
+        signer: createWalletClient({
+            account,
+            chain: baseSepolia,
+            transport: http(customRpcUrl),
+        }),
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const path = [USDT_ADDRESS, WETH_ADDRESS];
+    const amountsOut = await getSwapRate(amountInUsdt, path);
+    const amountOutMin = amountsOut[1];
+    const smartWalletAddress = await getSmartWalletAddress(privateKey);
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
+
+    await approveToken(USDT_ADDRESS, ROUTER_ADDRESS, amountInUsdt, smartWallet);
+    const transactionHash = await swapTokens(amountInUsdt, amountOutMin, path, smartWalletAddress, deadline, smartWallet);
+
+    return transactionHash;
+}
+
+// New function to unwrap WETH to ETH
+async function unwrapWeth(privateKey) {
+    const account = privateKeyToAccount(privateKey);
+    const smartWallet = await createSmartAccountClient({
+        signer: createWalletClient({
+            account,
+            chain: baseSepolia,
+            transport: http(customRpcUrl),
+        }),
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const wethBalance = await getTokenBalance(WETH_ADDRESS, account.address);
+    const encodedCall = encodeFunctionData({
+        abi: WETH9.abi,
+        functionName: 'withdraw',
+        args: [wethBalance],
+    });
+
+    const transaction = {
+        to: WETH_ADDRESS,
+        data: encodedCall,
+    };
+
+    const userOpResponse = await smartWallet.sendTransaction(transaction, {
+        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+    });
+
+    const { transactionHash } = await userOpResponse.waitForTxHash();
+    console.log("Unwrap WETH Transaction Hash:", transactionHash);
+
+    const userOpReceipt = await userOpResponse.wait();
+    if (userOpReceipt.success == 'true') {
+        console.log("UserOp receipt", userOpReceipt);
+        console.log("Transaction receipt", userOpReceipt.receipt);
+    }
+
+    return transactionHash;
+}
+
+
 
 // Function to get balances
 async function getBalances(privateKey) {
@@ -334,17 +401,37 @@ async function swapUsdcToUsdtAmount(privateKey, amount) {
     return usdcToUsdtTxHash;
 }
 
+// Function to wrap ETH to WETH and swap WETH to USDT
+async function wrapEthAndSwapToUsdt(privateKey, amountInEth) {
+    await wrapEth(privateKey, amountInEth);
+    await swapWethToUsdt(privateKey, parseUnits(amountInEth, 18));
+}
+
+// Function to swap USDT to WETH and unwrap WETH to ETH
+async function swapUsdtToWethAndUnwrap(privateKey, amountInUsdt) {
+    await swapUsdtToWeth(privateKey, parseUnits(amountInUsdt, 18));
+    await unwrapWeth(privateKey);
+}
 
 
+// Export the new functions
+module.exports = {
+    getBalances,
+    getUsdtToUsdcSwapRate,
+    getUsdcToUsdtSwapRate,
+    swapUsdtToUsdcAmount,
+    swapUsdcToUsdtAmount,
+    wrapEthAndSwapToUsdt,
+    swapUsdtToWethAndUnwrap
+};
 
-module.exports = { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount, wrapEth, swapWethToUsdt };
 
+// Example usage of the new function
 async function test() {
     const privateKey = process.env.PRIVATE_KEY;
 
     await getBalances(privateKey);
-    await wrapEth(privateKey, '0.0005');
-    await swapWethToUsdt(privateKey, parseUnits('0.0005', 18));
+    await wrapEthAndSwapToUsdt(privateKey, '0.001');
     await getBalances(privateKey);
 }
 
