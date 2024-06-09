@@ -361,6 +361,136 @@ app.post('/getBalances', async (req, res) => {
     }
 });
 
+// New endpoint for fetching USDT to USDC swap rate
+app.post('/getUsdtToUsdcRate', async (req, res) => {
+    console.log('Received request at /getUsdtToUsdcRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const usdtToUsdcRate = await getUsdtToUsdcSwapRate(amount);
+        console.log('USDT to USDC Rate:', usdtToUsdcRate);
+        return res.status(200).json({ rate: usdtToUsdcRate });
+    } catch (error) {
+        console.error('Error getting USDT to USDC rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// New endpoint for fetching USDC to USDT swap rate
+app.post('/getUsdcToUsdtRate', async (req, res) => {
+    console.log('Received request at /getUsdcToUsdtRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const usdcToUsdtRate = await getUsdcToUsdtSwapRate(amount);
+        console.log('USDC to USDT Rate:', usdcToUsdtRate);
+        return res.status(200).json({ rate: usdcToUsdtRate });
+    } catch (error) {
+        console.error('Error getting USDC to USDT rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// New endpoint for swapping USDT to USDC
+app.post('/swapUsdtToUsdc', async (req, res) => {
+    console.log('Received request at /swapUsdtToUsdc');
+    console.log('Request body:', req.body);
+    const { initData, amount } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+            console.log('Swapping USDT to USDC...');
+            const transactionHash = await swapUsdtToUsdcAmount(privateKey, amount);
+
+            return res.status(200).json({ transactionHash });
+        } catch (error) {
+            console.error('Error retrieving private key or swapping USDT to USDC:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
+// New endpoint for swapping USDC to USDT
+app.post('/swapUsdcToUsdt', async (req, res) => {
+    console.log('Received request at /swapUsdcToUsdt');
+    console.log('Request body:', req.body);
+    const { initData, amount } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+            console.log('Swapping USDC to USDT...');
+            const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
+
+            return res.status(200).json({ transactionHash });
+        } catch (error) {
+            console.error('Error retrieving private key or swapping USDC to USDT:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
+
+
 
 
 app.use('/webhook', webhookRouter);

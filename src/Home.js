@@ -191,6 +191,9 @@ const Home = () => {
         }
     }, [showPopup]);
 
+    const formatBalance = (balance) => parseFloat(balance).toFixed(4);
+
+
     return (
         <div className="Home">
             <div className="nft-page">
@@ -199,8 +202,8 @@ const Home = () => {
                     <p>Wallet address:</p>
                     <p className="wallet-address">{walletAddress}</p>
                     <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
-                    <p>USDT balance: {balances.usdtBalance}</p> {/* Display USDT balance */}
-                    <p>USDC balance: {balances.usdcBalance}</p> {/* Display USDC balance */}
+                    <p>🍆 balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
+                    <p>🥒 balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
 
                     <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
                     <button className='pulse-orange-button' onClick={() => navigate('/swap')}>Swap</button>
