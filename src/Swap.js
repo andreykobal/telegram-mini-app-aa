@@ -77,15 +77,15 @@ const Swap = () => {
         <div className='Swap'>
             <p className="glow-text">Swap</p>
             <div className="balance-info">
-                <p>🍆 balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
-                <p>🥒 balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
+                <p>USDT balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
+                <p>USDC balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
             </div>
             <div className="swap-widget">
                 <input
                     type="text"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    placeholder={`Enter amount in ${fromCurrency === 'USDT' ? '🍆' : '🥒'}`}
+                    placeholder={`Enter amount in ${fromCurrency}`}
                 />
                 <br />
                 <button onClick={handleSwitch}>Switch</button>
@@ -94,7 +94,7 @@ const Swap = () => {
                     type="text"
                     value={rate ? parseFloat(rate).toFixed(4) : ''}
                     readOnly
-                    placeholder={`Amount in ${toCurrency === 'USDT' ? '🍆' : '🥒'}`}
+                    placeholder={`Amount in ${toCurrency}`}
                 />
             </div>
             <button onClick={handleSwap}>Swap</button>

@@ -202,8 +202,8 @@ const Home = () => {
                     <p>Wallet address:</p>
                     <p className="wallet-address">{walletAddress}</p>
                     <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
-                    <p>🍆 balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
-                    <p>🥒 balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
+                    <p>USDT balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
+                    <p>USDC balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
 
                     <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
                     <button className='pulse-orange-button' onClick={() => navigate('/swap')}>Swap</button>
