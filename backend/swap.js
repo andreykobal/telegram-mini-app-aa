@@ -223,8 +223,7 @@ async function main() {
     const amountsOut = await getSwapRate(amountIn, path);
     const amountOutMin = amountsOut[1]; // Minimum amount of USDC to receive
 
-    const formattedAmountOutMin = parseFloat(formatEther(amountOutMin)).toFixed(4);
-    console.log(`Swap Rate: 1 USDT = ${formattedAmountOutMin} USDC`);
+    console.log(`Swap Rate: 1 USDT = ${formatEther(amountOutMin)} USDC`);
 
     const to = smartWalletAddress; // Recipient address
     const deadline = Math.floor(Date.now() / 1000) + 60 * 10; // Transaction deadline
