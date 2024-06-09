@@ -1,22 +1,68 @@
-// Import required modules from viem and other libraries
-const { createPublicClient, createWalletClient, http } = require("viem");
+const { createPublicClient, createWalletClient, http, writeContract } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
 const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
+const { formatEther, parseUnits } = require("viem");
 const { parseAbi, encodeFunctionData } = require("viem");
+
+const routerArtifact = require("@uniswap/v2-periphery/build/UniswapV2Router02.json");
 
 require('dotenv').config();
 
 // Configuration for Biconomy Paymaster, Bundler, and RPC URL
 const config = {
     biconomyPaymasterApiKey: process.env.BICONOMY_PAYMASTER_API_KEY,
-    bundlerUrl: process.env.BUNDLER_URL,
-    routerAddress: process.env.ROUTER_ADDRESS,
-    usdtAddress: process.env.USDT_ADDRESS,
-    usdcAddress: process.env.USDC_ADDRESS
+    bundlerUrl: process.env.BUNDLER_URL
 };
 
 const customRpcUrl = process.env.CUSTOM_RPC_URL;
+
+// Contract addresses
+const USDT_ADDRESS = '0x5934F0856ed563760D3087d2a99ad7b3D8cd42c5';
+const USDC_ADDRESS = '0xA8fDAad0d4B52232cf9A676064EAbFB088F5003B';
+const ROUTER_ADDRESS = '0x88aD494054E8EB1916D47a346baBeb2f776e859e';
+
+// Minimal ABI to interact with ERC20 Tokens
+const erc20Abi = [
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "_owner",
+                "type": "address"
+            }
+        ],
+        "name": "balanceOf",
+        "outputs": [
+            {
+                "name": "balance",
+                "type": "uint256"
+            }
+        ],
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_spender",
+                "type": "address"
+            },
+            {
+                "name": "_value",
+                "type": "uint256"
+            }
+        ],
+        "name": "approve",
+        "outputs": [
+            {
+                "name": "success",
+                "type": "bool"
+            }
+        ],
+        "type": "function"
+    }
+];
 
 // Function to get the smart wallet address
 async function getSmartWalletAddress(privateKey) {
@@ -34,36 +80,51 @@ async function getSmartWalletAddress(privateKey) {
     });
 
     const saAddress = await smartWallet.getAccountAddress();
-    console.log("Retrieved Smart Wallet Address:", saAddress);  // Logging the address
     return saAddress;
 }
 
-// Function to approve the router to spend USDT
-async function approveRouter(privateKey, amount) {
-    const account = privateKeyToAccount(privateKey);
-    const client = createWalletClient({
-        account,
+// Function to get the ETH balance
+async function getEthBalance(address) {
+    const publicClient = createPublicClient({
         chain: baseSepolia,
-        transport: http(customRpcUrl),
+        transport: http(customRpcUrl)
     });
 
-    const smartWallet = await createSmartAccountClient({
-        signer: client,
-        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
-        bundlerUrl: config.bundlerUrl,
+    const balance = await publicClient.getBalance({
+        address: address,
+        blockTag: 'latest'
     });
 
-    const saAddress = await smartWallet.getAccountAddress();
-    console.log("Smart Account Address for Approval:", saAddress);
+    return balance;
+}
 
+// Function to get token balance
+async function getTokenBalance(tokenAddress, walletAddress) {
+    const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http(customRpcUrl)
+    });
+
+    const balance = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [walletAddress]
+    });
+
+    return balance;
+}
+
+// Function to approve token transfer
+async function approveToken(tokenAddress, spenderAddress, amount, smartWallet) {
     const encodedCall = encodeFunctionData({
-        abi: parseAbi(["function approve(address spender, uint256 value) public returns (bool)"]),
-        functionName: "approve",
-        args: [config.routerAddress, BigInt(amount * 10 ** 18)],
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [spenderAddress, amount]
     });
 
     const transaction = {
-        to: config.usdtAddress,
+        to: tokenAddress,
         data: encodedCall,
     };
 
@@ -75,7 +136,7 @@ async function approveRouter(privateKey, amount) {
     console.log("Approval Transaction Hash:", transactionHash);
 
     const userOpReceipt = await userOpResponse.wait();
-    if (userOpReceipt.success === 'true') {
+    if (userOpReceipt.success == 'true') {
         console.log("UserOp receipt", userOpReceipt);
         console.log("Transaction receipt", userOpReceipt.receipt);
     }
@@ -83,40 +144,16 @@ async function approveRouter(privateKey, amount) {
     return transactionHash;
 }
 
-// Function to perform a token swap
-async function swapTokens(privateKey, amount) {
-    const account = privateKeyToAccount(privateKey);
-    const client = createWalletClient({
-        account,
-        chain: baseSepolia,
-        transport: http(customRpcUrl),
-    });
-
-    const smartWallet = await createSmartAccountClient({
-        signer: client,
-        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
-        bundlerUrl: config.bundlerUrl,
-    });
-
-    const saAddress = await smartWallet.getAccountAddress();
-    console.log("Smart Account Address for Swap:", saAddress);
-
+// Function to swap tokens on Uniswap
+async function swapTokens(amountIn, amountOutMin, path, to, deadline, smartWallet) {
     const encodedCall = encodeFunctionData({
-        abi: parseAbi([
-            "function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline) external returns (uint256[] memory amounts)"
-        ]),
-        functionName: "swapExactTokensForTokens",
-        args: [
-            BigInt(amount * 10 ** 18),
-            0,
-            [config.usdtAddress, config.usdcAddress],
-            saAddress,
-            Math.floor(Date.now() / 1000) + 60 * 10
-        ],
+        abi: routerArtifact.abi,
+        functionName: 'swapExactTokensForTokens',
+        args: [amountIn, amountOutMin, path, to, deadline]
     });
 
     const transaction = {
-        to: config.routerAddress,
+        to: ROUTER_ADDRESS,
         data: encodedCall,
     };
 
@@ -128,7 +165,7 @@ async function swapTokens(privateKey, amount) {
     console.log("Swap Transaction Hash:", transactionHash);
 
     const userOpReceipt = await userOpResponse.wait();
-    if (userOpReceipt.success === 'true') {
+    if (userOpReceipt.success == 'true') {
         console.log("UserOp receipt", userOpReceipt);
         console.log("Transaction receipt", userOpReceipt.receipt);
     }
@@ -136,82 +173,50 @@ async function swapTokens(privateKey, amount) {
     return transactionHash;
 }
 
-// Function to log the balance of ETH, USDT, and USDC for a given address
-async function logBalance(address) {
-    const publicClient = createPublicClient({
-        chain: baseSepolia,
-        transport: http(customRpcUrl)
+// Exporting functions for external use
+module.exports = { getSmartWalletAddress, getEthBalance, getTokenBalance, approveToken, swapTokens };
+
+// Example usage
+async function main() {
+    const privateKey = process.env.PRIVATE_KEY;
+    const smartWalletAddress = await getSmartWalletAddress(privateKey);
+
+    const ethBalance = await getEthBalance(smartWalletAddress);
+    const usdtBalance = await getTokenBalance(USDT_ADDRESS, smartWalletAddress);
+    const usdcBalance = await getTokenBalance(USDC_ADDRESS, smartWalletAddress);
+
+    console.log(`Smart Wallet Address: ${smartWalletAddress}`);
+    console.log(`ETH Balance: ${ethBalance}`);
+    console.log(`USDT Balance: ${usdtBalance}`);
+    console.log(`USDC Balance: ${usdcBalance}`);
+
+    const account = privateKeyToAccount(privateKey);
+    const smartWallet = await createSmartAccountClient({
+        signer: createWalletClient({
+            account,
+            chain: baseSepolia,
+            transport: http(customRpcUrl),
+        }),
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
     });
 
-    if (!address) {
-        console.error("Address is null or undefined");
-        return;
-    }
+    const amountIn = parseUnits('1', 18); // Amount of USDT to swap
+    const amountOutMin = 0; // Minimum amount of USDC to receive
+    const path = [USDT_ADDRESS, USDC_ADDRESS]; // Swap path
+    const to = smartWalletAddress; // Recipient address
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 10; // Transaction deadline
 
-    try {
-        const ethBalance = await publicClient.getBalance(String(address));
-        const usdtBalance = await publicClient.readContract({
-            address: config.usdtAddress,
-            abi: parseAbi(["function balanceOf(address owner) view returns (uint256)"]),
-            functionName: "balanceOf",
-            args: [String(address)],
-        });
+    await approveToken(USDT_ADDRESS, ROUTER_ADDRESS, amountIn, smartWallet);
+    await swapTokens(amountIn, amountOutMin, path, to, deadline, smartWallet);
 
-        const usdcBalance = await publicClient.readContract({
-            address: config.usdcAddress,
-            abi: parseAbi(["function balanceOf(address owner) view returns (uint256)"]),
-            functionName: "balanceOf",
-            args: [String(address)],
-        });
+    const newUsdtBalance = await getTokenBalance(USDT_ADDRESS, smartWalletAddress);
+    const newUsdcBalance = await getTokenBalance(USDC_ADDRESS, smartWalletAddress);
 
-        const balances = {
-            ethBalance: ethBalance.toString(),
-            usdtBalance: usdtBalance.toString(),
-            usdcBalance: usdcBalance.toString(),
-        };
-
-        console.log(balances);
-        return balances;
-    } catch (error) {
-        console.error("Error logging balance:", error);
-    }
+    console.log(`New USDT Balance: ${newUsdtBalance}`);
+    console.log(`New USDC Balance: ${newUsdcBalance}`);
 }
 
-// Main function to execute the swap process
-async function main(privateKey) {
-    if (!privateKey) {
-        console.error("Private key is null or undefined");
-        return;
-    }
-
-    // Get the smart wallet address
-    const saAddress = await getSmartWalletAddress(privateKey);
-    console.log("Smart Wallet Address:", saAddress);
-
-    if (!saAddress) {
-        console.error("Failed to retrieve Smart Wallet Address");
-        return;
-    }
-
-    // Log initial balances
-    await logBalance(saAddress);
-
-    // Approve the router to spend USDT
-    await approveRouter(privateKey, 1);
-
-    // Perform the token swap
-    await swapTokens(privateKey, 1);
-
-    // Log final balances after the swap
-    await logBalance(saAddress);
-}
-
-// Exporting functions for external use
-module.exports = { main, getSmartWalletAddress, logBalance, approveRouter, swapTokens };
-
-// Test the execution
-main(process.env.PRIVATE_KEY).then(() => {
-    console.log("Swap completed successfully");
-}).catch((error) => {
-    console.error("Error executing swap:", error);
+main().catch((error) => {
+    console.error("Error:", error);
 });
