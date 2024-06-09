@@ -71,8 +71,7 @@ async function getEthBalance(address) {
         blockTag: 'latest'  // Optional parameter
     });
 
-    const balanceAsEther = formatEther(balance);
-    return balanceAsEther;
+    return balance;
 }
 
 // Function to get token balance
@@ -89,8 +88,7 @@ async function getTokenBalance(tokenAddress, walletAddress) {
         args: [walletAddress]
     });
 
-    const balanceAsEther = formatEther(balance);
-    return balanceAsEther;
+    return balance;
 }
 
 // Exporting functions for external use
