@@ -1,9 +1,7 @@
-const { createPublicClient, createWalletClient, http, writeContract } = require("viem");
+const { createPublicClient, createWalletClient, http, parseUnits, encodeFunctionData } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
 const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
-const { formatEther, parseUnits } = require("viem");
-const { parseAbi, encodeFunctionData } = require("viem");
 
 const routerArtifact = require("@uniswap/v2-periphery/build/UniswapV2Router02.json");
 
