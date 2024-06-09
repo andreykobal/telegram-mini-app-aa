@@ -1,13 +1,15 @@
 //Home.js
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './App.css';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
 import { getWalletBalance } from './balance'; // Import the balance fetching function
+import './App.css';
 
-function Home() {
+
+const Home = () => {
     const [initData, setInitData] = useState('');
     const [tokenId, setTokenId] = useState('');
     const [toAddress, setToAddress] = useState('');
@@ -18,7 +20,11 @@ function Home() {
     const [walletAddress, setWalletAddress] = useState('');
     const [walletBalance, setWalletBalance] = useState('');
     const [amount, setAmount] = useState('');
-    const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' }); // Add this state for storing balances
+    const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' });
+    const [transferType, setTransferType] = useState('');
+
+    const navigate = useNavigate();
+
 
     const getRarityDetails = (rarity) => {
         switch (rarity) {
@@ -59,7 +65,6 @@ function Home() {
                 setWalletBalance(balance); // Set the fetched balance
 
                 // Fetch token balances
-                // TODO - Add the following code to fetch token balances to the frontend using wallet address for more speed
                 const balancesResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
                 setBalances(balancesResponse.data.balances);
             } catch (error) {
@@ -141,7 +146,7 @@ function Home() {
             const interval = setInterval(async () => {
                 const balance = await getWalletBalance(walletAddress);
                 setWalletBalance(balance);
-            }, 1500); // 30000 milliseconds = 30 seconds
+            }, 1500); // 1500 milliseconds = 1.5 seconds
 
             return () => clearInterval(interval); // Cleanup interval on component unmount
         }
@@ -150,6 +155,7 @@ function Home() {
     const openTransferPopup = (tokenId) => {
         setTokenId(tokenId);
         setPopupContent({ message: '', showLoader: false });
+        setTransferType('NFT');
         setShowPopup(true);
     };
 
@@ -173,6 +179,7 @@ function Home() {
 
     const openSendEthPopup = () => {
         setPopupContent({ message: '', showLoader: false });
+        setTransferType('ETH');
         setShowPopup(true);
     };
 
@@ -196,6 +203,7 @@ function Home() {
                     <p>USDC balance: {balances.usdcBalance}</p> {/* Display USDC balance */}
 
                     <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
+                    <button className='pulse-orange-button' onClick={() => navigate('/swap')}>Swap</button>
                     <button className='pulse-orange-button' onClick={mint}>Mint</button>
                 </div>
                 {loading && (
@@ -253,31 +261,47 @@ function Home() {
                                 <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
                             </>
                         ) : (
-                            <>
-                                <p>Send ETH</p>
-                                <input
-                                    type="text"
-                                    placeholder="Enter amount in ETH"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Enter recipient address"
-                                    value={toAddress}
-                                    onChange={(e) => setToAddress(e.target.value)}
-                                />
-                                <div>
-                                    <button className='pulse-orange-button' onClick={() => sendEth(amount, toAddress)}>Send</button>
-                                    <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
-                                </div>
-                            </>
+                            transferType === 'NFT' ? (
+                                <>
+                                    <p>Transfer NFT with id: {tokenId}</p>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter wallet address"
+                                        value={toAddress}
+                                        onChange={(e) => setToAddress(e.target.value)}
+                                    />
+                                    <div>
+                                        <button className='pulse-orange-button' onClick={transfer}>Send</button>
+                                        <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <p>Send ETH</p>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter amount in ETH"
+                                        value={amount}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter recipient address"
+                                        value={toAddress}
+                                        onChange={(e) => setToAddress(e.target.value)}
+                                    />
+                                    <div>
+                                        <button className='pulse-orange-button' onClick={() => sendEth(amount, toAddress)}>Send</button>
+                                        <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
+                                    </div>
+                                </>
+                            )
                         )}
                     </div>
                 </div>
             )}
         </div>
     );
-}
+};
 
 export default Home;

@@ -7,7 +7,7 @@ html {
   background-color: black;
 }
 
-.App {
+.Home, .Swap {
   background: rgb(14, 13, 36);
   text-align: center;
   color: white;
