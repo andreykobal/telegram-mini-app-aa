@@ -59,6 +59,7 @@ function App() {
         setWalletBalance(balance); // Set the fetched balance
 
         // Fetch token balances
+        // TODO - Add the following code to fetch token balances to the frontend using wallet address for more speed
         const balancesResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
         setBalances(balancesResponse.data.balances);
       } catch (error) {
