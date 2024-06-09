@@ -14,6 +14,8 @@ const { mint, transferNFT, getNFTs, getSmartWalletAddress, sendETH} = require(".
 const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const MetadataIndex = require('./models/MetadataIndex'); 
+const { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount } = require('./swap');
+
 
 require('dotenv').config();
 
@@ -318,6 +320,47 @@ app.post('/getNFTs', async (req, res) => {
         return res.status(403).send('Invalid data');
     }
 });
+
+
+//swap endpoints
+
+app.post('/getBalances', async (req, res) => {
+    console.log('Received request at /getBalances');
+    console.log('Request body:', req.body);
+    const { initData } = req.body;
+
+    if (!initData) {
+        console.log('Init data is missing');
+        return res.status(400).send('Init data is required');
+    }
+
+    if (validateTelegramData(initData)) {
+        const urlParams = new URLSearchParams(initData);
+        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+        const telegramId = userObj ? userObj.id : null;
+
+        if (!telegramId) {
+            console.log('Telegram ID is missing');
+            return res.status(400).send('Telegram ID is required');
+        }
+
+        try {
+            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+            console.log('Private Key:', privateKey);
+            console.log('Retrieving balances...');
+            const balances = await getBalances(privateKey);
+
+            return res.status(200).json({ balances });
+        } catch (error) {
+            console.error('Error retrieving private key or balances:', error);
+            return res.status(500).send('Internal server error');
+        }
+    } else {
+        console.log('Validation failed. Invalid data.');
+        return res.status(403).send('Invalid data');
+    }
+});
+
 
 
 app.use('/webhook', webhookRouter);

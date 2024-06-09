@@ -16,6 +16,8 @@ function App() {
   const [walletAddress, setWalletAddress] = useState('');
   const [walletBalance, setWalletBalance] = useState('');
   const [amount, setAmount] = useState('');
+  const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' }); // Add this state for storing balances
+
 
 
   const getRarityDetails = (rarity) => {
@@ -55,6 +57,10 @@ function App() {
         getNFTs();
         const balance = await getWalletBalance(response.data.user.walletAddress); // Fetch wallet balance
         setWalletBalance(balance); // Set the fetched balance
+
+        // Fetch token balances
+        const balancesResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
+        setBalances(balancesResponse.data.balances);
       } catch (error) {
         console.error('Error validating data:', error);
       }
@@ -187,6 +193,9 @@ function App() {
           <p>Wallet address:</p>
           <p className="wallet-address">{walletAddress}</p>
           <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
+          <p>USDT balance: {balances.usdtBalance}</p> {/* Display USDT balance */}
+          <p>USDC balance: {balances.usdcBalance}</p> {/* Display USDC balance */}
+
           <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
           <button className='pulse-orange-button' onClick={mint}>Mint</button>
         </div>
