@@ -17,6 +17,8 @@ function App() {
   const [walletBalance, setWalletBalance] = useState('');
   const [amount, setAmount] = useState('');
   const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' }); // Add this state for storing balances
+  const [transferType, setTransferType] = useState(''); // Add this line
+
 
 
 
@@ -150,8 +152,10 @@ function App() {
   const openTransferPopup = (tokenId) => {
     setTokenId(tokenId);
     setPopupContent({ message: '', showLoader: false });
+    setTransferType('NFT'); // Add this line
     setShowPopup(true);
   };
+
 
   const sendEth = async (amount, toAddress) => {
     try {
@@ -175,6 +179,7 @@ function App() {
 
   const openSendEthPopup = () => {
     setPopupContent({ message: '', showLoader: false });
+    setTransferType('ETH'); // Add this line
     setShowPopup(true);
   };
 
@@ -255,29 +260,46 @@ function App() {
                 <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
               </>
             ) : (
-              <>
-                <p>Send ETH</p>
-                <input
-                  type="text"
-                  placeholder="Enter amount in ETH"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Enter recipient address"
-                  value={toAddress}
-                  onChange={(e) => setToAddress(e.target.value)}
-                />
-                <div>
-                  <button className='pulse-orange-button' onClick={() => sendEth(amount, toAddress)}>Send</button>
-                  <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
-                </div>
-              </>
+              transferType === 'NFT' ? (
+                <>
+                  <p>Transfer NFT with id: {tokenId}</p>
+                  <input
+                    type="text"
+                    placeholder="Enter wallet address"
+                    value={toAddress}
+                    onChange={(e) => setToAddress(e.target.value)}
+                  />
+                  <div>
+                    <button className='pulse-orange-button' onClick={transfer}>Send</button>
+                    <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>Send ETH</p>
+                  <input
+                    type="text"
+                    placeholder="Enter amount in ETH"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enter recipient address"
+                    value={toAddress}
+                    onChange={(e) => setToAddress(e.target.value)}
+                  />
+                  <div>
+                    <button className='pulse-orange-button' onClick={() => sendEth(amount, toAddress)}>Send</button>
+                    <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
+                  </div>
+                </>
+              )
             )}
           </div>
         </div>
       )}
+
 
 
     </div>
