@@ -1,4 +1,4 @@
-const { createPublicClient, createWalletClient, http, parseUnits, encodeFunctionData } = require("viem");
+const { createPublicClient, createWalletClient, http, parseUnits, encodeFunctionData, formatEther } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
 const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
@@ -223,7 +223,8 @@ async function main() {
     const amountsOut = await getSwapRate(amountIn, path);
     const amountOutMin = amountsOut[1]; // Minimum amount of USDC to receive
 
-    console.log(`Swap Rate: 1 USDT = ${amountOutMin.toString()} USDC`);
+    const formattedAmountOutMin = parseFloat(formatEther(amountOutMin)).toFixed(4);
+    console.log(`Swap Rate: 1 USDT = ${formattedAmountOutMin} USDC`);
 
     const to = smartWalletAddress; // Recipient address
     const deadline = Math.floor(Date.now() / 1000) + 60 * 10; // Transaction deadline
