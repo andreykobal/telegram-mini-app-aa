@@ -3,7 +3,9 @@ const { privateKeyToAccount } = require("viem/accounts");
 const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
 const routerArtifact = require("@uniswap/v2-periphery/build/UniswapV2Router02.json");
+const WETH9 = require("./WETH9.json");
 require('dotenv').config();
+
 
 const config = {
     biconomyPaymasterApiKey: process.env.BICONOMY_PAYMASTER_API_KEY,
@@ -14,6 +16,8 @@ const customRpcUrl = process.env.CUSTOM_RPC_URL;
 const USDT_ADDRESS = '0x5934F0856ed563760D3087d2a99ad7b3D8cd42c5';
 const USDC_ADDRESS = '0xA8fDAad0d4B52232cf9A676064EAbFB088F5003B';
 const ROUTER_ADDRESS = '0x88aD494054E8EB1916D47a346baBeb2f776e859e';
+const WETH_ADDRESS = '0xe47684cE984A390e9eb3138b8486996CF820fBc8';
+
 
 const erc20Abi = [
     {
@@ -231,6 +235,72 @@ async function swapTokens(amountIn, amountOutMin, path, to, deadline, smartWalle
     return transactionHash;
 }
 
+async function wrapEth(privateKey, amountInEth) {
+    const account = privateKeyToAccount(privateKey);
+    const smartWallet = await createSmartAccountClient({
+        signer: createWalletClient({
+            account,
+            chain: baseSepolia,
+            transport: http(customRpcUrl),
+        }),
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const amountInWei = parseUnits(amountInEth, 18);
+    const encodedCall = encodeFunctionData({
+        abi: WETH9.abi,
+        functionName: 'deposit',
+        args: [],
+    });
+
+    const transaction = {
+        to: WETH_ADDRESS,
+        data: encodedCall,
+        value: amountInWei,
+    };
+
+    const userOpResponse = await smartWallet.sendTransaction(transaction, {
+        paymasterServiceData: { mode: PaymasterMode.SPONSORED },
+    });
+
+    const { transactionHash } = await userOpResponse.waitForTxHash();
+    console.log("Wrap ETH Transaction Hash:", transactionHash);
+
+    const userOpReceipt = await userOpResponse.wait();
+    if (userOpReceipt.success == 'true') {
+        console.log("UserOp receipt", userOpReceipt);
+        console.log("Transaction receipt", userOpReceipt.receipt);
+    }
+
+    return transactionHash;
+}
+
+async function swapWethToUsdt(privateKey, amountInWeth) {
+    const account = privateKeyToAccount(privateKey);
+    const smartWallet = await createSmartAccountClient({
+        signer: createWalletClient({
+            account,
+            chain: baseSepolia,
+            transport: http(customRpcUrl),
+        }),
+        biconomyPaymasterApiKey: config.biconomyPaymasterApiKey,
+        bundlerUrl: config.bundlerUrl,
+    });
+
+    const path = [WETH_ADDRESS, USDT_ADDRESS];
+    const amountsOut = await getSwapRate(amountInWeth, path);
+    const amountOutMin = amountsOut[1];
+    const smartWalletAddress = await getSmartWalletAddress(privateKey);
+    const deadline = Math.floor(Date.now() / 1000) + 60 * 10;
+
+    await approveToken(WETH_ADDRESS, ROUTER_ADDRESS, amountInWeth, smartWallet);
+    const transactionHash = await swapTokens(amountInWeth, amountOutMin, path, smartWalletAddress, deadline, smartWallet);
+
+    return transactionHash;
+}
+
+
 // Function to get balances
 async function getBalances(privateKey) {
     const balances = await getTokenBalances(privateKey);
@@ -264,19 +334,20 @@ async function swapUsdcToUsdtAmount(privateKey, amount) {
     return usdcToUsdtTxHash;
 }
 
-module.exports = { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount };
 
-// async function test() {
-//     const privateKey = process.env.PRIVATE_KEY;
 
-//     await getBalances(privateKey);
-//     await getUsdtToUsdcSwapRate('5');
-//     await getUsdcToUsdtSwapRate('5');
-//     await swapUsdtToUsdcAmount(privateKey, '5');
-//     await swapUsdcToUsdtAmount(privateKey, '5');
-//     await getBalances(privateKey);
-// }
 
-// test().catch((error) => {
-//     console.error("Error:", error);
-// });
+module.exports = { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount, wrapEth, swapWethToUsdt };
+
+async function test() {
+    const privateKey = process.env.PRIVATE_KEY;
+
+    await getBalances(privateKey);
+    await wrapEth(privateKey, '0.0005');
+    await swapWethToUsdt(privateKey, parseUnits('0.0005', 18));
+    await getBalances(privateKey);
+}
+
+test().catch((error) => {
+    console.error("Error:", error);
+});
