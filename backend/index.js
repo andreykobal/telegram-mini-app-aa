@@ -1,6 +1,6 @@
 //backend/index.js
 
-const { generatePrivateKey } = require('viem/accounts')
+const { generatePrivateKey } = require('viem/accounts');
 const express = require('express');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
@@ -10,33 +10,26 @@ const User = require('./models/User'); // Import the User model
 const { router: webhookRouter, setWebhook } = require('./webhook');
 const { DefaultAzureCredential } = require('@azure/identity');
 const { SecretClient } = require('@azure/keyvault-secrets');
-const { mint, transferNFT, getNFTs, getSmartWalletAddress, sendETH} = require("./nft"); 
+const { mint, transferNFT, getNFTs, getSmartWalletAddress, sendETH } = require("./nft");
 const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
-const MetadataIndex = require('./models/MetadataIndex'); 
+const MetadataIndex = require('./models/MetadataIndex');
 const { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount } = require('./swap');
 
-
 require('dotenv').config();
-
-
-
 
 const app = express();
 const port = process.env.PORT || 5001;
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
-
 const uri = process.env.MONGODB_URI;
 
-// Azure Key Vault configuration
 const keyVaultName = "aa-testnet";
 const keyVaultUrl = `https://${keyVaultName}.vault.azure.net`;
 const credential = new DefaultAzureCredential();
 const secretClient = new SecretClient(keyVaultUrl, credential);
 
-// Connect to MongoDB
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.error('MongoDB connection error:', err));
@@ -45,6 +38,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Utility Functions
 function validateTelegramData(initData) {
     console.log('Validating Telegram Data:', initData);
     const urlParams = new URLSearchParams(initData);
@@ -88,9 +82,7 @@ async function getPrivateKeyFromKeyVault(secretName) {
     }
 }
 
-app.post('/authenticate', async (req, res) => {
-    console.log('Received request at /authenticate');
-    console.log('Request body:', req.body);
+async function handleAuthentication(req, res, action) {
     const { initData } = req.body;
 
     if (!initData) {
@@ -133,7 +125,7 @@ app.post('/authenticate', async (req, res) => {
             }
 
             console.log('User authenticated:', user);
-            return res.status(200).json({ user });
+            return action(user, res);
         } catch (error) {
             console.error('Database error:', error);
             return res.status(500).send('Internal server error');
@@ -142,12 +134,12 @@ app.post('/authenticate', async (req, res) => {
         console.log('Validation failed. Invalid data.');
         return res.status(403).send('Invalid data');
     }
-});
+}
 
-app.post('/sendETH', async (req, res) => {
-    console.log('Received request at /sendETH');
-    console.log('Request body:', req.body);
-    const { initData, toAddress, amount } = req.body;
+app.post('/authenticate', (req, res) => handleAuthentication(req, res, (user, res) => res.status(200).json({ user })));
+
+async function handlePrivateKeyAction(req, res, action) {
+    const { initData } = req.body;
 
     if (!initData) {
         console.log('Init data is missing');
@@ -167,20 +159,16 @@ app.post('/sendETH', async (req, res) => {
         try {
             const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
             console.log('Private Key:', privateKey);
-            console.log('Sending ETH...');
-            const transactionHash = await sendETH(privateKey, toAddress, amount);  // Capture the returned transaction hash
-
-            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
+            return action(privateKey, res);
         } catch (error) {
-            console.error('Error retrieving private key or sending ETH:', error);
+            console.error('Error retrieving private key:', error);
             return res.status(500).send('Internal server error');
         }
     } else {
         console.log('Validation failed. Invalid data.');
         return res.status(403).send('Invalid data');
     }
-});
-
+}
 
 async function getTokenURI() {
     const indexDoc = await MetadataIndex.findOneAndUpdate(
@@ -198,168 +186,45 @@ async function getTokenURI() {
     return metadata.urls[indexDoc.currentIndex];
 }
 
+app.post('/sendETH', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { toAddress, amount } = req.body;
+    console.log('Sending ETH...');
+    const transactionHash = await sendETH(privateKey, toAddress, amount);
+    return res.status(200).json({ transactionHash });
+}));
 
+app.post('/mint', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const tokenURI = await getTokenURI();  // Get the next token URI
+    console.log('Minting NFT with Token URI:', tokenURI);
+    const transactionHash = await mint(privateKey, tokenURI);
+    return res.status(200).json({ transactionHash });
+}));
 
-app.post('/mint', async (req, res) => {
-    console.log('Received request at /mint');
-    console.log('Request body:', req.body);
-    const { initData } = req.body;
+app.post('/transfer', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { tokenId, toAddress } = req.body;
+    console.log('Transferring NFT...');
+    const transactionHash = await transferNFT(privateKey, tokenId, toAddress);
+    return res.status(200).json({ transactionHash });
+}));
 
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
+app.post('/getNFTs', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    console.log('Retrieving NFTs...');
+    const data = await getNFTs(privateKey);
 
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
+    // Convert BigInt to string before sending JSON response
+    const nfts = [
+        data[0].map(id => id.toString()),
+        data[1]
+    ];
 
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
+    return res.status(200).json({ nfts });
+}));
 
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            const tokenURI = await getTokenURI();  // Get the next token URI
-            console.log('Private Key:', privateKey);
-            console.log('Minting NFT with Token URI:', tokenURI);
-            const transactionHash = await mint(privateKey, tokenURI);  // Pass the token URI to the mint function
-
-            return res.status(200).json({ transactionHash });
-        } catch (error) {
-            console.error('Error retrieving private key or minting NFT:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
-
-
-
-app.post('/transfer', async (req, res) => {
-    console.log('Received request at /transfer');
-    console.log('Request body:', req.body);
-    const { initData, tokenId, toAddress } = req.body;
-
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
-
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
-
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
-
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-            console.log('Transferring NFT...');
-            const transactionHash = await transferNFT(privateKey, tokenId, toAddress);  // Capture the returned transaction hash
-
-            return res.status(200).json({ transactionHash });  // Respond with the transaction hash
-        } catch (error) {
-            console.error('Error retrieving private key or transferring NFT:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
-
-
-app.post('/getNFTs', async (req, res) => {
-    console.log('Received request at /getNFTs');
-    console.log('Request body:', req.body);
-    const { initData } = req.body;
-
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
-
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
-
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
-
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-            console.log('Retrieving NFTs...');
-            const data = await getNFTs(privateKey);
-
-            // Convert BigInt to string before sending JSON response
-            const nfts = [
-                data[0].map(id => id.toString()),
-                data[1]
-            ];
-
-            return res.status(200).json({ nfts });
-        } catch (error) {
-            console.error('Error retrieving private key or NFTs:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
-
-
-//swap endpoints
-
-app.post('/getBalances', async (req, res) => {
-    console.log('Received request at /getBalances');
-    console.log('Request body:', req.body);
-    const { initData } = req.body;
-
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
-
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
-
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
-
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-            console.log('Retrieving balances...');
-            const balances = await getBalances(privateKey);
-
-            return res.status(200).json({ balances });
-        } catch (error) {
-            console.error('Error retrieving private key or balances:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
+app.post('/getBalances', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    console.log('Retrieving balances...');
+    const balances = await getBalances(privateKey);
+    return res.status(200).json({ balances });
+}));
 
 // New endpoint for fetching USDT to USDC swap rate
 app.post('/getUsdtToUsdcRate', async (req, res) => {
@@ -404,94 +269,20 @@ app.post('/getUsdcToUsdtRate', async (req, res) => {
 });
 
 // New endpoint for swapping USDT to USDC
-app.post('/swapUsdtToUsdc', async (req, res) => {
-    console.log('Received request at /swapUsdtToUsdc');
-    console.log('Request body:', req.body);
-    const { initData, amount } = req.body;
-
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
-
-    if (!amount) {
-        console.log('Amount is missing');
-        return res.status(400).send('Amount is required');
-    }
-
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
-
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
-
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-            console.log('Swapping USDT to USDC...');
-            const transactionHash = await swapUsdtToUsdcAmount(privateKey, amount);
-
-            return res.status(200).json({ transactionHash });
-        } catch (error) {
-            console.error('Error retrieving private key or swapping USDT to USDC:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
+app.post('/swapUsdtToUsdc', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping USDT to USDC...');
+    const transactionHash = await swapUsdtToUsdcAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
 
 // New endpoint for swapping USDC to USDT
-app.post('/swapUsdcToUsdt', async (req, res) => {
-    console.log('Received request at /swapUsdcToUsdt');
-    console.log('Request body:', req.body);
-    const { initData, amount } = req.body;
-
-    if (!initData) {
-        console.log('Init data is missing');
-        return res.status(400).send('Init data is required');
-    }
-
-    if (!amount) {
-        console.log('Amount is missing');
-        return res.status(400).send('Amount is required');
-    }
-
-    if (validateTelegramData(initData)) {
-        const urlParams = new URLSearchParams(initData);
-        const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
-        const telegramId = userObj ? userObj.id : null;
-
-        if (!telegramId) {
-            console.log('Telegram ID is missing');
-            return res.status(400).send('Telegram ID is required');
-        }
-
-        try {
-            const privateKey = await getPrivateKeyFromKeyVault(String(telegramId));
-            console.log('Private Key:', privateKey);
-            console.log('Swapping USDC to USDT...');
-            const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
-
-            return res.status(200).json({ transactionHash });
-        } catch (error) {
-            console.error('Error retrieving private key or swapping USDC to USDT:', error);
-            return res.status(500).send('Internal server error');
-        }
-    } else {
-        console.log('Validation failed. Invalid data.');
-        return res.status(403).send('Invalid data');
-    }
-});
-
-
-
-
+app.post('/swapUsdcToUsdt', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping USDC to USDT...');
+    const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
 
 app.use('/webhook', webhookRouter);
 
