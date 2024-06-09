@@ -426,15 +426,13 @@ module.exports = {
 };
 
 
-// Example usage of the new function
-async function test() {
-    const privateKey = process.env.PRIVATE_KEY;
+// // Example usage of the new function
+// async function test() {
+//     const privateKey = process.env.PRIVATE_KEY;
 
-    await getBalances(privateKey);
-    await wrapEthAndSwapToUsdt(privateKey, '0.001');
-    await getBalances(privateKey);
-}
+//     await swapUsdtToWethAndUnwrap(privateKey, '100');
+// }
 
-test().catch((error) => {
-    console.error("Error:", error);
-});
+// test().catch((error) => {
+//     console.error("Error:", error);
+// });
