@@ -1,7 +1,7 @@
 .custom-select-container {
     position: absolute;
     right: 0;
-    width: 90px;
+    width: 96px;
     z-index: 100;
 }
 
@@ -49,11 +49,6 @@
 }
 .custom-select-option:hover {
     background: #f0f0f0;
-}
-.currency-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
 }
 .down-icon {
     fill: white;

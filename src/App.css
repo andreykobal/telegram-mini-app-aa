@@ -762,11 +762,12 @@ button {
 .swap-input-field {
   font-family: "Roboto", sans-serif;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 24px;
   background: none;
   border: none;
   color: #fff;
   padding: 0;
+  max-width: 256px;
 }
 .swap-input-field::placeholder {
   color: #ccc;
@@ -781,4 +782,15 @@ button {
 .swap-input select {
   position: absolute;
   right: 0;
+}
+.currency-icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+.balance-info-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }

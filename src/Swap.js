@@ -8,6 +8,9 @@ import { ReactComponent as InfoIcon } from './icons/circle-info-solid.svg';
 import { BackButton } from '@vkruglikov/react-telegram-web-app';
 import CustomSelect from './CustomSelect';
 
+const EthIcon = require('./icons/eth.png');
+const UsdtIcon = require('./icons/usdt.png');
+const UsdcIcon = require('./icons/usdc.png');
 
 
 
@@ -134,10 +137,22 @@ const Swap = () => {
     return (
         <div className='Swap'>
             <div className="balance-info">
+                <div className="balance-info-item">
+                    <p>{balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p> 
+                    <img src={EthIcon} alt="ETH" className='currency-icon' />
+                    <p>ETH</p>
+                </div>
+                <div className="balance-info-item">
+                    <p>{balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
+                    <img src={UsdtIcon} alt="USDT" className='currency-icon' />
+                    <p>USDT</p>
+                </div>
+                <div className="balance-info-item">
+                    <p>{balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
+                    <img src={UsdcIcon} alt="USDC" className='currency-icon' />
+                    <p>USDC</p>
+                </div>    
 
-                <p>ETH: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
-                <p>USDT: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
-                <p>USDC: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
 
 
 
