@@ -479,8 +479,77 @@ button {
   margin-bottom: 8px;
   border-radius: 8px;
   padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
+.mint-header-icons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin-top: 8px;
 
+}
+.mint-header-icons>.mint-header-icon:first-child .mint-header-icon-svg {
+  /* Your styles here */
+  transform: rotate(45deg);
+  /* Example style */
+}
+.mint-header-icon-svg {
+  fill: white;
+  width: 16px;
+  height: 16px;
+  padding: 8px;
+  background: linear-gradient(180deg,
+            #FF9502,
+            #FF4C03);
+  border-radius: 32px;
+}
+.mint-header-wallet-address {
+  background-color: rgb(44, 44, 100);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0;
+  padding: 4px 8px;
+  border-radius: 16px;
+}
+.mint-header-wallet-address p {
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+}
+.copy-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+  fill: white;
+}
+.copy-popup {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.copy-popup p { 
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
 .lds-ripple {
   /* change color here */

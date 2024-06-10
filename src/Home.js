@@ -5,6 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
+import { ReactComponent as SendIcon } from './icons/arrow-up-solid.svg';
+import { ReactComponent as SwapIcon } from './icons/right-left-solid.svg';
+import { ReactComponent as NftIcon } from './icons/gem-regular.svg';
+import { ReactComponent as CopyIcon } from './icons/copy-solid.svg';
+
 import { getWalletBalance } from './balance'; // Import the balance fetching function
 import './App.css';
 import EthToUsdConverter from './EthToUsdConverter';
@@ -23,6 +28,8 @@ const Home = () => {
     const [walletBalance, setWalletBalance] = useState('');
     const [amount, setAmount] = useState('');
     const [transferType, setTransferType] = useState('');
+    const [showCopyPopup, setShowCopyPopup] = useState(false);
+
 
     const navigate = useNavigate();
 
@@ -200,17 +207,43 @@ const Home = () => {
     }
 
 
+    const handleCopyClick = () => {
+        navigator.clipboard.writeText(walletAddress);
+        setShowCopyPopup(true);
+        setTimeout(() => {
+            setShowCopyPopup(false);
+        }, 2000);
+    };
+
+
     return (
         <div className="Home">
             <div className="nft-page">
                 <div className="mint-header">
                     <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
+                    <div className="mint-header-wallet-address" onClick={handleCopyClick}>
                     <p>{formatWalletAddress(walletAddress)}</p>
+                    <CopyIcon className='copy-icon'/>
+                    </div>
                     <h2>{parseFloat(walletBalance).toFixed(4)} ETH</h2> {/* Display wallet balance */}
                     <EthToUsdConverter ethValue={walletBalance} />
-                    <button onClick={openSendEthPopup}>Send</button>
-                    <button onClick={() => navigate('/swap')}>Swap</button>
-                    <button onClick={mint}>Mint</button>
+                    <div className="mint-header-icons">
+                        <div className="mint-header-icon" onClick={openSendEthPopup}>
+                            <SendIcon className="mint-header-icon-svg" />
+                            <p>Send</p>
+                        </div>
+                        <div className="mint-header-icon" onClick={() => navigate('/swap')}>
+                            <SwapIcon className="mint-header-icon-svg" />
+                            <p>Swap</p>
+                        </div>
+                        <div className="mint-header-icon" onClick={mint}>
+                            <NftIcon className="mint-header-icon-svg" />
+                            <p>Mint</p>
+                        </div>
+                        {/* <button onClick={openSendEthPopup}>Send</button>
+                        <button onClick={() => navigate('/swap')}>Swap</button>
+                        <button onClick={mint}>Mint</button> */}
+                    </div>
                 </div>
                 {loading && (
                     <div className="loading-overlay">
@@ -250,6 +283,13 @@ const Home = () => {
                             </div>
                         );
                     })}
+
+                    {showCopyPopup && (
+                        <div className="copy-popup">
+                            <p>Copied to clipboard!</p>
+                        </div>
+                    )}
+
                 </div>
             </div>
 
