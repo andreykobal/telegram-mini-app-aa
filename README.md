@@ -74,6 +74,7 @@ Transforming Telegram into a seamless blockchain hub with our Account Abstractio
 
 3. Open your browser and navigate to `http://localhost:3000`
 
+
 ## API Endpoints
 
 ### POST /authenticate
@@ -111,6 +112,149 @@ Transforming Telegram into a seamless blockchain hub with our Account Abstractio
   ```json
   {
     "initData": "string"
+  }
+  ```
+
+### POST /sendETH
+- **Description**: Send ETH to another address.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "toAddress": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /getBalances
+- **Description**: Retrieve balances of the authenticated user's wallet.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string"
+  }
+  ```
+
+### POST /getUsdtToUsdcRate
+- **Description**: Fetch the swap rate from USDT to USDC.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /getUsdcToUsdtRate
+- **Description**: Fetch the swap rate from USDC to USDT.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /getUsdtToWethRate
+- **Description**: Fetch the swap rate from USDT to WETH.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /getWethToUsdtRate
+- **Description**: Fetch the swap rate from WETH to USDT.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /getUsdcToWethRate
+- **Description**: Fetch the swap rate from USDC to WETH.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /getWethToUsdcRate
+- **Description**: Fetch the swap rate from WETH to USDC.
+- **Request Body**:
+  ```json
+  {
+    "amount": "string"
+  }
+  ```
+
+### POST /swapUsdtToUsdc
+- **Description**: Swap USDT to USDC.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /swapUsdcToUsdt
+- **Description**: Swap USDC to USDT.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /swapUsdtToWeth
+- **Description**: Swap USDT to WETH.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /swapWethToUsdt
+- **Description**: Swap WETH to USDT.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /swapUsdcToWeth
+- **Description**: Swap USDC to WETH.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /swapWethToUsdc
+- **Description**: Swap WETH to USDC.
+- **Request Body**:
+  ```json
+  {
+    "initData": "string",
+    "amount": "string"
+  }
+  ```
+
+### POST /webhook
+- **Description**: Handle webhook events.
+- **Request Body**:
+  ```json
+  {
+    // Depends on the specific webhook implementation
   }
   ```
 
