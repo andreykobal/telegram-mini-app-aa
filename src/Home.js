@@ -7,6 +7,8 @@ import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
 import { getWalletBalance } from './balance'; // Import the balance fetching function
 import './App.css';
+import EthToUsdConverter from './EthToUsdConverter';
+
 
 
 const Home = () => {
@@ -20,7 +22,6 @@ const Home = () => {
     const [walletAddress, setWalletAddress] = useState('');
     const [walletBalance, setWalletBalance] = useState('');
     const [amount, setAmount] = useState('');
-    const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' });
     const [transferType, setTransferType] = useState('');
 
     const navigate = useNavigate();
@@ -63,10 +64,6 @@ const Home = () => {
                 getNFTs();
                 const balance = await getWalletBalance(response.data.user.walletAddress); // Fetch wallet balance
                 setWalletBalance(balance); // Set the fetched balance
-
-                // Fetch token balances
-                const balancesResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
-                setBalances(balancesResponse.data.balances);
             } catch (error) {
                 console.error('Error validating data:', error);
             }
@@ -191,7 +188,16 @@ const Home = () => {
         }
     }, [showPopup]);
 
-    const formatBalance = (balance) => parseFloat(balance).toFixed(4);
+    function formatWalletAddress(walletAddress) {
+        if (walletAddress.length <= 12) {
+            return walletAddress; // If the address is too short, just return it as is
+        }
+        
+        const firstPart = walletAddress.substring(0, 7);
+        const lastPart = walletAddress.substring(walletAddress.length - 5);
+        
+        return `${firstPart}...${lastPart}`;
+    }
 
 
     return (
@@ -199,15 +205,12 @@ const Home = () => {
             <div className="nft-page">
                 <div className="mint-header">
                     <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
-                    <p>Wallet address:</p>
-                    <p className="wallet-address">{walletAddress}</p>
-                    <p>Wallet balance: {walletBalance} ETH</p> {/* Display wallet balance */}
-                    <p>USDT balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
-                    <p>USDC balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
-
-                    <button className='pulse-orange-button' onClick={openSendEthPopup}>Send</button>
-                    <button className='pulse-orange-button' onClick={() => navigate('/swap')}>Swap</button>
-                    <button className='pulse-orange-button' onClick={mint}>Mint</button>
+                    <p>{formatWalletAddress(walletAddress)}</p>
+                    <h2>{parseFloat(walletBalance).toFixed(4)} ETH</h2> {/* Display wallet balance */}
+                    <EthToUsdConverter ethValue={walletBalance} />
+                    <button onClick={openSendEthPopup}>Send</button>
+                    <button onClick={() => navigate('/swap')}>Swap</button>
+                    <button onClick={mint}>Mint</button>
                 </div>
                 {loading && (
                     <div className="loading-overlay">

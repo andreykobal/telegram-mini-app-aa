@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
+import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
+
 
 const Swap = () => {
     const [initData, setInitData] = useState('');
@@ -10,6 +12,9 @@ const Swap = () => {
     const [amount, setAmount] = useState('');
     const [rate, setRate] = useState('');
     const [transactionHash, setTransactionHash] = useState('');
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
+
 
     const swapEndpoints = {
         'USDT-USDC': { rate: '/getUsdtToUsdcRate', swap: '/swapUsdtToUsdc' },
@@ -69,25 +74,27 @@ const Swap = () => {
 
     const handleSwap = async () => {
         try {
+            setShowPopup(true);
+            setPopupContent({ message: 'Swapping...', showLoader: true });
             const key = `${fromCurrency}-${toCurrency}`;
             if (swapEndpoints[key]) {
                 const endpoint = swapEndpoints[key].swap;
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { initData, amount });
                 setTransactionHash(response.data.transactionHash);
 
-                if (response.data.transactionHash) {
-                    alert(`Swap successful! Transaction hash: ${response.data.transactionHash}`);
-                } else {
-                    alert('Swap successful! But no transaction hash found.');
-                }
+                const txLink = `https://sepolia.basescan.org/tx/${response.data.transactionHash}`;
+                setPopupContent({
+                    message: `Swap success - transaction hash: <a href="${txLink}" class="orange" target="_blank" rel="noopener noreferrer">${response.data.transactionHash}</a>`,
+                    showLoader: false
+                });
 
                 // Fetch updated balances after successful swap
                 const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
                 setBalances(balanceResponse.data.balances);
             }
         } catch (error) {
+            setPopupContent({ message: 'Error executing swap. Please try again.', showLoader: false });
             console.error('Error executing swap:', error.response ? error.response.data : error.message);
-            alert('Swap failed!');
         }
     };
 
@@ -130,6 +137,24 @@ const Swap = () => {
                 />
             </div>
             <button onClick={handleSwap}>Swap</button>
+
+            {showPopup && (
+                <div className="popup">
+                    <div className="popup-content">
+                        {popupContent.showLoader ? (
+                            <>
+                                <p className="popup-content-message">{popupContent.message}</p>
+                                <div className="lds-ripple"><div></div><div></div></div>
+                            </>
+                        ) : (
+                            <>
+                                <p className="popup-content-message" dangerouslySetInnerHTML={{ __html: popupContent.message }}></p>
+                                <CloseIcon className='popup-close-icon' onClick={() => setShowPopup(false)} />
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
