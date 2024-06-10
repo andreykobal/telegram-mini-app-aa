@@ -174,6 +174,7 @@ const Swap = () => {
                     <button className="swap-button" onClick={handleSwap}>Swap</button>
                 </div>
             </div>
+            <div style={{ height: '73px' }}></div>
 
             {showPopup && (
                 <div className="popup">

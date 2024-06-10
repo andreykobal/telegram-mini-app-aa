@@ -20,6 +20,9 @@ html {
   background-repeat: no-repeat;
   background-position: center;
 }
+.Swap {
+  justify-content: space-evenly;
+}
 
 .header {
   width: 100%;
