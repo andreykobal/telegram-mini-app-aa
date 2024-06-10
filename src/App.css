@@ -689,7 +689,7 @@ button {
 }
 
 .switch-button {
-    background: #38378a;
+    background: rgb(72, 72, 163);
     width: 40px;
     height: 40px;
     display: flex;
@@ -697,6 +697,7 @@ button {
     justify-content: center;
     border-radius: 8px;
     margin-bottom: -20px;
+    z-index: 10;
     
 }
 .switch-button-icon {

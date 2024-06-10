@@ -6,14 +6,16 @@ import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as SwitchIcon } from './icons/right-left-solid.svg';
 import { ReactComponent as InfoIcon } from './icons/circle-info-solid.svg';
 import { BackButton } from '@vkruglikov/react-telegram-web-app';
+import CustomSelect from './CustomSelect';
+
 
 
 
 const Swap = () => {
     const [initData, setInitData] = useState('');
     const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '', wethBalance: '' });
-    const [fromCurrency, setFromCurrency] = useState('USDT');
-    const [toCurrency, setToCurrency] = useState('USDC');
+    const [fromCurrency, setFromCurrency] = useState('ETH'); // Change default to 'ETH'
+    const [toCurrency, setToCurrency] = useState('USDT'); // Change default to 'USDT'
     const [amount, setAmount] = useState('');
     const [rate, setRate] = useState('');
     const [transactionHash, setTransactionHash] = useState('');
@@ -128,12 +130,17 @@ const Swap = () => {
 
     const formatBalance = (balance) => parseFloat(balance).toFixed(4);
 
+
     return (
         <div className='Swap'>
             <div className="balance-info">
+
                 <p>ETH: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
                 <p>USDT: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
                 <p>USDC: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
+
+
+
             </div>
             <div className="swap-widget">
                 <div className="swap-widget-header">
@@ -146,16 +153,14 @@ const Swap = () => {
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder={`0.00 ${fromCurrency}`}
                         />
-                        <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
-                            <option value="USDT">USDT</option>
-                            <option value="USDC">USDC</option>
-                            <option value="ETH">ETH</option>
-                        </select>
+                        <CustomSelect onChange={(option) => setFromCurrency(option.label)} />
                     </div>
                 </div>
+
                 <div className='switch-button' onClick={handleSwitch}>
                     <SwitchIcon className="switch-button-icon" />
                 </div>
+
                 <div className="swap-widget-footer">
                     <p className="swap-widget-label glow-text">For</p>
                     <div className="swap-input">
@@ -166,18 +171,15 @@ const Swap = () => {
                             readOnly
                             placeholder={`0.00 ${toCurrency}`}
                         />
-                        <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
-                            <option value="USDT">USDT</option>
-                            <option value="USDC">USDC</option>
-                            <option value="ETH">ETH</option>
-                        </select>
+                        <CustomSelect onChange={(option) => setToCurrency(option.label)} />
                     </div>
                     <div className="swap-rate">
                         <InfoIcon className='info-icon' />
-                        <p> 1 {fromCurrency} = {exchangeRate ? parseFloat(exchangeRate).toFixed(4) : 'Loading...'} {toCurrency}</p>
+                        <p>1 {fromCurrency} = {exchangeRate ? parseFloat(exchangeRate).toFixed(4) : 'Loading...'} {toCurrency}</p>
                     </div>
                     <button className="swap-button" onClick={handleSwap}>Swap</button>
                 </div>
+
             </div>
             <div style={{ height: '73px' }}></div>
 
