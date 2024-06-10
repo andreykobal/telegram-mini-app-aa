@@ -483,6 +483,17 @@ async function swapUsdtToWethAndUnwrap(privateKey, amountInUsdt) {
     await unwrapWeth(privateKey);
 }
 
+async function wrapEthAndSwapToUsdc(privateKey, amountInEth) {
+    await wrapEth(privateKey, amountInEth);
+    await swapWethToUsdc(privateKey, parseUnits(amountInEth, 18));
+}
+
+async function swapUsdcToWethAndUnwrap(privateKey, amountInUsdt) {
+    await swapUsdcToWeth(privateKey, parseUnits(amountInUsdt, 18));
+    await unwrapWeth(privateKey);
+}
+
+
 
 // Export the new functions
 module.exports = {
@@ -500,10 +511,11 @@ module.exports = {
 async function test() {
     const privateKey = process.env.PRIVATE_KEY;
 
+    // Test the function swapWethToUsdcAndUnwrap
     console.log(await getBalances(privateKey));
-    await swapUsdcToWeth(privateKey, parseUnits('1',18));
-    await unwrapWeth(privateKey);
+    await swapUsdcToWethAndUnwrap(privateKey, '17');
     console.log(await getBalances(privateKey));
+    
 }
 
 test().catch((error) => {
