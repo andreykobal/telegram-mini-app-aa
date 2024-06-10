@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CustomSelect.css';
 import { ReactComponent as DownIcon } from './icons/chevron-down-solid.svg';
 
-// Use require() to import the PNG images
 const EthIcon = require('./icons/eth.png');
 const UsdtIcon = require('./icons/usdt.png');
 const UsdcIcon = require('./icons/usdc.png');
@@ -13,12 +12,18 @@ const options = [
     { value: '3', label: 'USDC', icon: <img src={UsdcIcon} alt="USDC" className='currency-icon' /> },
 ];
 
-const CustomSelect = ({ onChange, initialOption }) => {
-    // Initialize selectedOption with the initialOption prop
+const CustomSelect = ({ value, label, onChange, initialOption }) => {
     const [selectedOption, setSelectedOption] = useState(
         options.find(option => option.label === initialOption)
     );
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        const option = options.find(opt => opt.label === label);
+        if (option) {
+            setSelectedOption(option);
+        }
+    }, [value, label]);
 
     const handleOptionClick = (option) => {
         setSelectedOption(option);

@@ -169,8 +169,10 @@ const Swap = () => {
                             placeholder={`0.00 ${fromCurrency}`}
                         />
                         <CustomSelect
+                            value={fromCurrency}
+                            label={fromCurrency}
                             onChange={(option) => setFromCurrency(option.label)}
-                            initialOption="ETH" // Add this line
+                            initialOption="ETH" // Update this line
                         />
                     </div>
                 </div>
@@ -190,8 +192,10 @@ const Swap = () => {
                             placeholder={`0.00 ${toCurrency}`}
                         />
                         <CustomSelect
+                            value={toCurrency}
+                            label={toCurrency}
                             onChange={(option) => setToCurrency(option.label)}
-                            initialOption="USDT" // Add this line
+                            initialOption="USDT" // Update this line
                         />
                     </div>
                     <div className="swap-rate">
