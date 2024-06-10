@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as LogoMark } from './icons/Logomark-Blue.svg';
+import { ReactComponent as CardIcon } from './icons/credit-card-regular.svg';
 import { ReactComponent as SendIcon } from './icons/arrow-up-solid.svg';
 import { ReactComponent as SwapIcon } from './icons/right-left-solid.svg';
 import { ReactComponent as NftIcon } from './icons/gem-regular.svg';
@@ -23,7 +24,7 @@ const Home = () => {
     const [tokenId, setTokenId] = useState('');
     const [toAddress, setToAddress] = useState('');
     const [nfts, setNfts] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [showPopup, setShowPopup] = useState(false);
     const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
     const [walletAddress, setWalletAddress] = useState('');
@@ -222,7 +223,7 @@ const Home = () => {
         <div className="Home">
             <div className="nft-page">
                 <div className="mint-header">
-                    <p className='glow-text'>✨ Account Abstraction Magic ✨</p>
+                    {/* <p className='glow-text'>✨ Account Abstraction Magic ✨</p> */}
                     <div className="mint-header-wallet-address" onClick={handleCopyClick}>
                     <p>{formatWalletAddress(walletAddress)}</p>
                     <CopyIcon className='copy-icon'/>
@@ -235,16 +236,28 @@ const Home = () => {
                     <h2>{parseFloat(walletBalance).toFixed(4)} ETH</h2> {/* Display wallet balance */}
                     <EthToUsdConverter ethValue={walletBalance} />
                     <div className="mint-header-icons">
+                        <div className="mint-header-icon" onClick={() => navigate('/buy')}>
+                            <div className="mint-header-icon-svg-wrapper">
+                                <CardIcon className="mint-header-icon-svg" />
+                            </div>
+                            <p>Buy</p>
+                        </div>
                         <div className="mint-header-icon" onClick={openSendEthPopup}>
-                            <SendIcon className="mint-header-icon-svg" />
+                            <div className="mint-header-icon-svg-wrapper">
+                                <SendIcon className="mint-header-icon-svg" />
+                            </div>
                             <p>Send</p>
                         </div>
                         <div className="mint-header-icon" onClick={() => navigate('/swap')}>
+                            <div className="mint-header-icon-svg-wrapper">
                             <SwapIcon className="mint-header-icon-svg" />
+                            </div>
                             <p>Swap</p>
                         </div>
                         <div className="mint-header-icon" onClick={mint}>
+                            <div className="mint-header-icon-svg-wrapper">
                             <NftIcon className="mint-header-icon-svg" />
+                            </div>
                             <p>Mint</p>
                         </div>
                         {/* <button onClick={openSendEthPopup}>Send</button>

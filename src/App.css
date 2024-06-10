@@ -493,7 +493,7 @@ button {
   margin-top: 8px;
 
 }
-.mint-header-icons>.mint-header-icon:first-child .mint-header-icon-svg {
+.mint-header-icons>.mint-header-icon:nth-child(2) .mint-header-icon-svg {
   /* Your styles here */
   transform: rotate(45deg);
   /* Example style */
@@ -502,11 +502,20 @@ button {
   fill: white;
   width: 20px;
   height: 20px;
-  padding: 8px;
-  background: linear-gradient(180deg,
-            #FF9502,
-            #FF4C03);
-  border-radius: 32px;
+}
+.mint-header-icon-svg-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 8px;
+    background: linear-gradient(180deg,
+        #FF9502,
+        #FF4C03);
+        border-radius: 32px;
+        
 }
 .mint-header-wallet-address {
   background-color: rgb(44, 44, 100);
@@ -521,6 +530,9 @@ button {
 .mint-header-icon p {
   font-size: 12px;
 
+}
+.mint-header-icon.inactive {
+  opacity: 0.5;
 }
 .header-network {
   display: flex;
@@ -654,4 +666,21 @@ button {
 }
 .wallet-address {
   font-size: 10px;
+}
+.moonpay-widget-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  /* Allows horizontal scrolling if content exceeds width */
+  box-sizing: border-box;
+  /* Ensures padding and border are included in the element's total width and height */
+}
+
+.moonpay-widget {
+  margin: 0 !important;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  /* Ensures padding and border are included in the element's total width and height */
 }

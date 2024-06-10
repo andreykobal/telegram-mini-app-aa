@@ -105,9 +105,9 @@ const Swap = () => {
         <div className='Swap'>
             <p className="glow-text">Swap</p>
             <div className="balance-info">
-                <p>USDT balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
-                <p>USDC balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
-                <p>ETH balance: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
+                <p>ETH: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
+                <p>USDT: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
+                <p>USDC: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
             </div>
             <div className="swap-widget">
                 <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>

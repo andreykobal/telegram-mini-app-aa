@@ -3,13 +3,15 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './Home';
 import Swap from './Swap'; // Import the new Swap component
+import Buy from './Buy';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/swap" element={<Swap />} /> {/* Add this line for the /swap route */}
+        <Route path="/swap" element={<Swap />} />
+        <Route path="/buy" element={<Buy />} />
       </Routes>
     </Router>
   );
