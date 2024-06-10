@@ -173,59 +173,89 @@ async function handlePrivateKeyAction(req, res, action) {
 }
 
 async function getTokenURI() {
-    const indexDoc = await MetadataIndex.findOneAndUpdate(
-        {},
-        { $inc: { currentIndex: 1 } },
-        { new: true, upsert: true }
-    );
+    try {
+        const indexDoc = await MetadataIndex.findOneAndUpdate(
+            {},
+            { $inc: { currentIndex: 1 } },
+            { new: true, upsert: true }
+        );
 
-    // Reset the index if it exceeds the length of the metadata URLs
-    if (indexDoc.currentIndex >= metadata.urls.length) {
-        indexDoc.currentIndex = 0;
-        await indexDoc.save();
+        // Reset the index if it exceeds the length of the metadata URLs
+        if (indexDoc.currentIndex >= metadata.urls.length) {
+            indexDoc.currentIndex = 0;
+            await indexDoc.save();
+        }
+
+        return metadata.urls[indexDoc.currentIndex];
+    } catch (error) {
+        console.error('Error getting token URI:', error);
+        throw error;
     }
-
-    return metadata.urls[indexDoc.currentIndex];
 }
 
 app.post('/sendETH', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { toAddress, amount } = req.body;
-    console.log('Sending ETH...');
-    const transactionHash = await sendETH(privateKey, toAddress, amount);
-    return res.status(200).json({ transactionHash });
+    try {
+        const { toAddress, amount } = req.body;
+        console.log('Sending ETH...');
+        const transactionHash = await sendETH(privateKey, toAddress, amount);
+        return res.status(200).json({ transactionHash });
+    } catch (error) {
+        console.error('Error sending ETH:', error);
+        return res.status(500).send('Internal server error');
+    }
 }));
 
 app.post('/mint', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const tokenURI = await getTokenURI();  // Get the next token URI
-    console.log('Minting NFT with Token URI:', tokenURI);
-    const transactionHash = await mint(privateKey, tokenURI);
-    return res.status(200).json({ transactionHash });
+    try {
+        const tokenURI = await getTokenURI();  // Get the next token URI
+        console.log('Minting NFT with Token URI:', tokenURI);
+        const transactionHash = await mint(privateKey, tokenURI);
+        return res.status(200).json({ transactionHash });
+    } catch (error) {
+        console.error('Error minting NFT:', error);
+        return res.status(500).send('Internal server error');
+    }
 }));
 
 app.post('/transfer', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { tokenId, toAddress } = req.body;
-    console.log('Transferring NFT...');
-    const transactionHash = await transferNFT(privateKey, tokenId, toAddress);
-    return res.status(200).json({ transactionHash });
+    try {
+        const { tokenId, toAddress } = req.body;
+        console.log('Transferring NFT...');
+        const transactionHash = await transferNFT(privateKey, tokenId, toAddress);
+        return res.status(200).json({ transactionHash });
+    } catch (error) {
+        console.error('Error transferring NFT:', error);
+        return res.status(500).send('Internal server error');
+    }
 }));
 
 app.post('/getNFTs', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    console.log('Retrieving NFTs...');
-    const data = await getNFTs(privateKey);
+    try {
+        console.log('Retrieving NFTs...');
+        const data = await getNFTs(privateKey);
 
-    // Convert BigInt to string before sending JSON response
-    const nfts = [
-        data[0].map(id => id.toString()),
-        data[1]
-    ];
+        // Convert BigInt to string before sending JSON response
+        const nfts = [
+            data[0].map(id => id.toString()),
+            data[1]
+        ];
 
-    return res.status(200).json({ nfts });
+        return res.status(200).json({ nfts });
+    } catch (error) {
+        console.error('Error retrieving NFTs:', error);
+        return res.status(500).send('Internal server error');
+    }
 }));
 
 app.post('/getBalances', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    console.log('Retrieving balances...');
-    const balances = await getBalances(privateKey);
-    return res.status(200).json({ balances });
+    try {
+        console.log('Retrieving balances...');
+        const balances = await getBalances(privateKey);
+        return res.status(200).json({ balances });
+    } catch (error) {
+        console.error('Error retrieving balances:', error);
+        return res.status(500).send('Internal server error');
+    }
 }));
 
 // New endpoint for fetching USDT to USDC swap rate
@@ -355,53 +385,126 @@ app.post('/getWethToUsdcRate', async (req, res) => {
 });
 
 // New endpoint for swapping USDT to USDC
-app.post('/swapUsdtToUsdc', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping USDT to USDC...');
-    const transactionHash = await swapUsdtToUsdcAmount(privateKey, amount);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapUsdtToUsdc', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping USDT to USDC...');
+                const transactionHash = await swapUsdtToUsdcAmount(privateKey, amount);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping USDT to USDC:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapUsdtToUsdc endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // New endpoint for swapping USDC to USDT
-app.post('/swapUsdcToUsdt', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping USDC to USDT...');
-    const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapUsdcToUsdt', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping USDC to USDT...');
+                const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping USDC to USDT:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapUsdcToUsdt endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // New endpoint for swapping USDT to WETH
-app.post('/swapUsdtToWeth', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping USDT to WETH...');
-    const transactionHash = await swapUsdtToWethAmount(privateKey, amount);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapUsdtToWeth', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping USDT to WETH...');
+                const transactionHash = await swapUsdtToWethAmount(privateKey, amount);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping USDT to WETH:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapUsdtToWeth endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // New endpoint for swapping WETH to USDT
-app.post('/swapWethToUsdt', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping WETH to USDT...');
-    const transactionHash = await swapWethToUsdtAmount(privateKey, amount);
-    console.log('Transaction Hash:', transactionHash);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapWethToUsdt', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping WETH to USDT...');
+                const transactionHash = await swapWethToUsdtAmount(privateKey, amount);
+                console.log('Transaction Hash:', transactionHash);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping WETH to USDT:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapWethToUsdt endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // New endpoint for swapping USDC to WETH
-app.post('/swapUsdcToWeth', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping USDC to WETH...');
-    const transactionHash = await swapUsdcToWethAmount(privateKey, amount);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapUsdcToWeth', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping USDC to WETH...');
+                const transactionHash = await swapUsdcToWethAmount(privateKey, amount);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping USDC to WETH:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapUsdcToWeth endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // New endpoint for swapping WETH to USDC
-app.post('/swapWethToUsdc', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
-    const { amount } = req.body;
-    console.log('Swapping WETH to USDC...');
-    const transactionHash = await swapWethToUsdcAmount(privateKey, amount);
-    return res.status(200).json({ transactionHash });
-}));
+app.post('/swapWethToUsdc', async (req, res) => {
+    try {
+        await handlePrivateKeyAction(req, res, async (privateKey, res) => {
+            try {
+                const { amount } = req.body;
+                console.log('Swapping WETH to USDC...');
+                const transactionHash = await swapWethToUsdcAmount(privateKey, amount);
+                return res.status(200).json({ transactionHash });
+            } catch (error) {
+                console.error('Error swapping WETH to USDC:', error);
+                return res.status(500).send('Internal server error');
+            }
+        });
+    } catch (error) {
+        console.error('Error in /swapWethToUsdc endpoint:', error);
+        res.status(500).send('Internal server error');
+    }
+});
+
 
 
 app.use('/webhook', webhookRouter);
