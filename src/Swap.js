@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
 import { ReactComponent as SwitchIcon } from './icons/right-left-solid.svg';
 import { ReactComponent as InfoIcon } from './icons/circle-info-solid.svg';
+import { BackButton } from '@vkruglikov/react-telegram-web-app';
+
 
 
 const Swap = () => {
@@ -16,6 +19,8 @@ const Swap = () => {
     const [transactionHash, setTransactionHash] = useState('');
     const [showPopup, setShowPopup] = useState(false);
     const [popupContent, setPopupContent] = useState({ message: '', showLoader: false });
+
+    const navigate = useNavigate();
 
 
     const swapEndpoints = {
@@ -193,6 +198,7 @@ const Swap = () => {
                     </div>
                 </div>
             )}
+            <BackButton onClick={() => navigate(-1)} />
         </div>
     );
 };
