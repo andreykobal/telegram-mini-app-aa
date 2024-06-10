@@ -383,6 +383,7 @@ app.post('/swapWethToUsdt', (req, res) => handlePrivateKeyAction(req, res, async
     const { amount } = req.body;
     console.log('Swapping WETH to USDT...');
     const transactionHash = await swapWethToUsdtAmount(privateKey, amount);
+    console.log('Transaction Hash:', transactionHash);
     return res.status(200).json({ transactionHash });
 }));
 

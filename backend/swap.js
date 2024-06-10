@@ -288,22 +288,24 @@ async function swapUsdcToUsdtAmount(privateKey, amount) {
 
 async function swapWethToUsdtAmount(privateKey, amountInEth) {
     await wrapEth(privateKey, amountInEth);
-    await swapTokensHelper(privateKey, parseUnits(amountInEth, 18), [WETH_ADDRESS, USDT_ADDRESS]);
+    return swapTokensHelper(privateKey, parseUnits(amountInEth, 18), [WETH_ADDRESS, USDT_ADDRESS]);
 }
 
 async function swapUsdtToWethAmount(privateKey, amountInUsdt) {
-    await swapTokensHelper(privateKey, parseUnits(amountInUsdt, 18), [USDT_ADDRESS, WETH_ADDRESS]);
+    const transactionHash = await swapTokensHelper(privateKey, parseUnits(amountInUsdt, 18), [USDT_ADDRESS, WETH_ADDRESS]);
     await unwrapWeth(privateKey);
+    return transactionHash;
 }
 
 async function swapWethToUsdcAmount(privateKey, amountInEth) {
     await wrapEth(privateKey, amountInEth);
-    await swapTokensHelper(privateKey, parseUnits(amountInEth, 18), [WETH_ADDRESS, USDC_ADDRESS]);
+    return swapTokensHelper(privateKey, parseUnits(amountInEth, 18), [WETH_ADDRESS, USDC_ADDRESS]);
 }
 
 async function swapUsdcToWethAmount(privateKey, amountInUsdt) {
-    await swapTokensHelper(privateKey, parseUnits(amountInUsdt, 18), [USDC_ADDRESS, WETH_ADDRESS]);
+    const transactionHash = await swapTokensHelper(privateKey, parseUnits(amountInUsdt, 18), [USDC_ADDRESS, WETH_ADDRESS]);
     await unwrapWeth(privateKey);
+    return transactionHash;
 }
 
 

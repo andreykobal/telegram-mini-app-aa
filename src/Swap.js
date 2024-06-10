@@ -74,7 +74,12 @@ const Swap = () => {
                 const endpoint = swapEndpoints[key].swap;
                 const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { initData, amount });
                 setTransactionHash(response.data.transactionHash);
-                alert(`Swap successful! Transaction hash: ${response.data.transactionHash}`);
+
+                if (response.data.transactionHash) {
+                    alert(`Swap successful! Transaction hash: ${response.data.transactionHash}`);
+                } else {
+                    alert('Swap successful! But no transaction hash found.');
+                }
 
                 // Fetch updated balances after successful swap
                 const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
@@ -85,6 +90,7 @@ const Swap = () => {
             alert('Swap failed!');
         }
     };
+
 
     const formatBalance = (balance) => parseFloat(balance).toFixed(4);
 
