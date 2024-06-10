@@ -236,7 +236,8 @@ const Home = () => {
                     <h2>{parseFloat(walletBalance).toFixed(4)} ETH</h2> {/* Display wallet balance */}
                     <EthToUsdConverter ethValue={walletBalance} />
                     <div className="mint-header-icons">
-                        <div className="mint-header-icon" onClick={() => navigate('/buy')}>
+                        {/* <div className="mint-header-icon" onClick={() => navigate('/buy')}> */}
+                        <div className="mint-header-icon inactive">
                             <div className="mint-header-icon-svg-wrapper">
                                 <CardIcon className="mint-header-icon-svg" />
                             </div>
@@ -260,9 +261,6 @@ const Home = () => {
                             </div>
                             <p>Mint</p>
                         </div>
-                        {/* <button onClick={openSendEthPopup}>Send</button>
-                        <button onClick={() => navigate('/swap')}>Swap</button>
-                        <button onClick={mint}>Mint</button> */}
                     </div>
                 </div>
                 {loading && (

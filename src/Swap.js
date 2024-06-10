@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import { ReactComponent as CloseIcon } from './icons/circle-xmark-regular.svg';
+import { ReactComponent as SwitchIcon } from './icons/right-left-solid.svg';
+import { ReactComponent as InfoIcon } from './icons/circle-info-solid.svg';
 
 
 const Swap = () => {
@@ -98,45 +100,80 @@ const Swap = () => {
         }
     };
 
+    const [exchangeRate, setExchangeRate] = useState('');
+
+    useEffect(() => {
+        const fetchExchangeRate = async () => {
+            try {
+                const key = `${fromCurrency}-${toCurrency}`;
+                if (swapEndpoints[key]) {
+                    const endpoint = swapEndpoints[key].rate;
+                    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { amount: "1" });
+                    setExchangeRate(response.data.rate);
+                }
+            } catch (error) {
+                console.error('Error fetching exchange rate:', error.response ? error.response.data : error.message);
+            }
+        };
+
+        fetchExchangeRate();
+    }, [fromCurrency, toCurrency]);
+
+
 
     const formatBalance = (balance) => parseFloat(balance).toFixed(4);
 
     return (
         <div className='Swap'>
-            <p className="glow-text">Swap</p>
             <div className="balance-info">
                 <p>ETH: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
                 <p>USDT: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
                 <p>USDC: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
             </div>
             <div className="swap-widget">
-                <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
-                    <option value="USDT">USDT</option>
-                    <option value="USDC">USDC</option>
-                    <option value="ETH">ETH</option>
-                </select>
-                <input
-                    type="text"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    placeholder={`Enter amount in ${fromCurrency}`}
-                />
-                <br />
-                <button onClick={handleSwitch}>Switch</button>
-                <br />
-                <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
-                    <option value="USDT">USDT</option>
-                    <option value="USDC">USDC</option>
-                    <option value="ETH">ETH</option>
-                </select>
-                <input
-                    type="text"
-                    value={rate ? parseFloat(rate).toFixed(4) : ''}
-                    readOnly
-                    placeholder={`Amount in ${toCurrency}`}
-                />
+                <div className="swap-widget-header">
+                    <p className="swap-widget-label glow-text">Swap</p>
+                    <div className="swap-input">
+                        <input
+                            className='swap-input-field'
+                            type="text"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder={`0.00 ${fromCurrency}`}
+                        />
+                        <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+                            <option value="USDT">USDT</option>
+                            <option value="USDC">USDC</option>
+                            <option value="ETH">ETH</option>
+                        </select>
+                    </div>
+                </div>
+                <div className='switch-button' onClick={handleSwitch}>
+                    <SwitchIcon className="switch-button-icon" />
+                </div>
+                <div className="swap-widget-footer">
+                    <p className="swap-widget-label glow-text">For</p>
+                    <div className="swap-input">
+                        <input
+                            className='swap-input-field'
+                            type="text"
+                            value={rate ? parseFloat(rate).toFixed(4) : ''}
+                            readOnly
+                            placeholder={`0.00 ${toCurrency}`}
+                        />
+                        <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+                            <option value="USDT">USDT</option>
+                            <option value="USDC">USDC</option>
+                            <option value="ETH">ETH</option>
+                        </select>
+                    </div>
+                    <div className="swap-rate">
+                        <InfoIcon className='info-icon' />
+                        <p> 1 {fromCurrency} = {exchangeRate ? parseFloat(exchangeRate).toFixed(4) : 'Loading...'} {toCurrency}</p>
+                    </div>
+                    <button className="swap-button" onClick={handleSwap}>Swap</button>
+                </div>
             </div>
-            <button onClick={handleSwap}>Swap</button>
 
             {showPopup && (
                 <div className="popup">

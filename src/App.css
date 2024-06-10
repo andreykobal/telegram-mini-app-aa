@@ -684,3 +684,97 @@ button {
   box-sizing: border-box;
   /* Ensures padding and border are included in the element's total width and height */
 }
+
+.switch-button {
+    background: #38378a;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-bottom: -20px;
+    
+}
+.switch-button-icon {
+  width: 16px;
+  height: 16px;
+  fill: white;
+  transform: rotate(90deg);
+}
+.swap-widget {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #38378a67;
+  padding: 4px;
+  border-radius: 16px;
+}
+
+.swap-widget-label {
+  font-size: 12px;
+  text-align: left;
+  width: 100%;
+}
+.swap-button {
+  width: 100%;
+  margin-top: 8px;
+}
+.swap-widget-footer {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #38378a78;
+  border-radius: 16px;
+}
+.swap-widget-header {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.swap-rate {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  margin-top: 4px;
+}
+.swap-rate p {
+  font-size: 12px;
+  color: #ccc;
+}
+.info-icon {
+  fill: #ccc;
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+}
+.swap-input-field {
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 0;
+}
+.swap-input-field::placeholder {
+  color: #ccc;
+}
+.swap-input {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.swap-input select {
+  position: absolute;
+  right: 0;
+}
