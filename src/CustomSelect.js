@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import './CustomSelect.css';
-import { ReactComponent as EthIcon } from './icons/eth.svg';
-import { ReactComponent as UsdtIcon } from './icons/usdt.svg';
-import { ReactComponent as UsdcIcon } from './icons/usdc.svg';
 import { ReactComponent as DownIcon } from './icons/chevron-down-solid.svg';
 
+// Use require() to import the PNG images
+const EthIcon = require('./icons/eth.png');
+const UsdtIcon = require('./icons/usdt.png');
+const UsdcIcon = require('./icons/usdc.png');
+
 const options = [
-    { value: '1', label: 'ETH', icon: <EthIcon className='currency-icon' /> },
-    { value: '2', label: 'USDT', icon: <UsdtIcon className='currency-icon' /> },
-    { value: '3', label: 'USDC', icon: <UsdcIcon className='currency-icon' /> },
+    { value: '1', label: 'ETH', icon: <img src={EthIcon} alt="ETH" className='currency-icon' /> },
+    { value: '2', label: 'USDT', icon: <img src={UsdtIcon} alt="USDT" className='currency-icon' /> },
+    { value: '3', label: 'USDC', icon: <img src={UsdcIcon} alt="USDC" className='currency-icon' /> },
 ];
 
-const CustomSelect = ({ onChange }) => {
-    // Initialize selectedOption with the first option in the array
-    const [selectedOption, setSelectedOption] = useState(options.find(option => option.label === 'ETH')); // Change based on initial state requirement
+const CustomSelect = ({ onChange, initialOption }) => {
+    // Initialize selectedOption with the initialOption prop
+    const [selectedOption, setSelectedOption] = useState(
+        options.find(option => option.label === initialOption)
+    );
     const [isOpen, setIsOpen] = useState(false);
 
     const handleOptionClick = (option) => {
