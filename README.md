@@ -250,13 +250,8 @@ Transforming Telegram into a seamless blockchain hub with our Account Abstractio
   ```
 
 ### POST /webhook
-- **Description**: Handle webhook events.
-- **Request Body**:
-  ```json
-  {
-    // Depends on the specific webhook implementation
-  }
-  ```
+- **Description**: Handle Telegram webhook events.
+
 
 ## Folder Structure
 
