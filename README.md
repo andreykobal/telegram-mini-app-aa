@@ -1,6 +1,6 @@
-# 🪄 Welcome to Telegram Mini App Account Abstraction Magic! 🪄
+# 🪄 Welcome to Telegram Super dApp Account Abstraction Magic! 🪄
 
-A seamless experience for Telegram users!
+Transforming Telegram into a seamless blockchain hub with our Account Abstraction Magic SDK — making crypto asset management effortless, secure, and gas-free for everyone
 
 <img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/53708f8e-4006-44e0-8f80-025cfecb9c67" width="512">
 
@@ -19,22 +19,19 @@ A seamless experience for Telegram users!
 
 ## Features
 
-- **💼 Custodial Wallet**: Created at first use, securely stored in Azure Key Vault.
-- **🔑 Smart Accounts**: Auto-creation using Biconomy's AA.
-- **⚡️ Mint NFTs**: Tap the mint button to use your smart account.
-- **💸 No Gas Fees**: Biconomy Paymaster covers them!
-- **🔄 Transfer NFTs**: Withdraw and transfer your NFTs easily.
-- **🌐 View on OpenSea**: Check out your NFTs on OpenSea.
-- **⚡️ Deployed on Base**: Fast, cheap transactions.
-- **📲 Your NFTs**: Displayed directly in the app.
-- 👉 **Click the button below to open the app!**
+- **💼 Custodial Wallet**: Created and securely stored in Azure Key Vault.
+- **🔑 Smart Accounts**: Auto-creation using ERC-4337 account abstraction.
+- **⚡️ Mint NFTs**: Easily mint NFTs with a single tap.
+- **💸 No Gas Fees**: Gasless transactions facilitated by advanced transaction management.
+- **🏦 Token and NFT Management**: Simple and secure transfers and swaps of tokens and NFTs.
+- **🌐 View NFTs**: NFTs displayed directly in the app wallet.
+- **🔄 Built-in Token Swap**: Powered by Uniswap for seamless token exchanges.
+- **📲 Developer Friendly SDK**: Facilitates further integration and development.
 
 ## Screenshots
 
-<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/011d5df4-f328-47b0-98aa-bd7b9fdd7d8a" width="256">
-<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/733b1364-fd62-4089-b856-e28979dbbf9d" width="256">
-<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/8c46c8fa-4311-4d90-8822-3f31ea52bdb5" width="256">
-<img src="https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/71d2f2c2-dbdf-4516-a5de-d147f5131205" width="256">
+![photo_2024-06-10 21 11 07-imageonline co-merged](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/1801653a-32a6-46f8-9548-220fa4b6eb6e)
+![photo_2024-06-10 21 11 16-imageonline co-merged](https://github.com/andreykobal/telegram-mini-app-aa/assets/19206978/3ee6e48a-f02b-4f03-975a-e374340ea45a)
 
 
 
@@ -124,7 +121,6 @@ A seamless experience for Telegram users!
 ├── .gitignore
 ├── backend
 │   ├── .gitignore
-│   ├── create-wallet.js
 │   ├── index.js
 │   ├── metadata.json
 │   ├── models
@@ -133,9 +129,15 @@ A seamless experience for Telegram users!
 │   ├── nft.js
 │   ├── package-lock.json
 │   ├── package.json
+│   ├── swap.js
+│   ├── test-swap-copy.js
+│   ├── test-swap.js
 │   ├── utils
-│   │   └── delete-user.js
-│   └── webhook.js
+│   │   ├── delete-all-users.js
+│   │   ├── delete-user.js
+│   │   └── get-all-users.js
+│   ├── webhook.js
+│   └── WETH9.json
 ├── package-lock.json
 ├── package.json
 ├── public
@@ -150,14 +152,20 @@ A seamless experience for Telegram users!
     ├── App.css
     ├── App.js
     ├── App.test.js
+    ├── balance.js
+    ├── Buy.js
+    ├── client.js
+    ├── CustomSelect.css
+    ├── CustomSelect.js
+    ├── EthToUsdConverter.js
+    ├── Home.js
     ├── icons
-    │   ├── circle-xmark-regular.svg
-    │   └── Logomark-Blue.svg
     ├── index.css
     ├── index.js
     ├── logo.svg
     ├── reportWebVitals.js
-    └── setupTests.js
+    ├── setupTests.js
+    └── Swap.js
 ```
 
 ## Technologies Used
@@ -165,8 +173,8 @@ A seamless experience for Telegram users!
 - **Frontend**: React
 - **Backend**: Node.js, Express
 - **Database**: MongoDB
-- **Blockchain**: Viem, Biconomy
-- **Hosting**: Azure
+- **Blockchain**: Hardhat, Viem, Biconomy, Base
+- **Hosting**: Azure, Vercel
 
 ## Contributing
 
