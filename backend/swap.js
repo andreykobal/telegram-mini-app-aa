@@ -279,11 +279,11 @@ async function getSwapRateHelper(amount, path) {
 }
 
 async function swapUsdtToUsdcAmount(privateKey, amount) {
-    return swapTokensHelper(privateKey, amount, [USDT_ADDRESS, USDC_ADDRESS]);
+    return swapTokensHelper(privateKey, parseUnits(amount, 18), [USDT_ADDRESS, USDC_ADDRESS]);
 }
 
 async function swapUsdcToUsdtAmount(privateKey, amount) {
-    return swapTokensHelper(privateKey, amount, [USDC_ADDRESS, USDT_ADDRESS]);
+    return swapTokensHelper(privateKey, parseUnits(amount, 18), [USDC_ADDRESS, USDT_ADDRESS]);
 }
 
 async function swapWethToUsdtAmount(privateKey, amountInEth) {

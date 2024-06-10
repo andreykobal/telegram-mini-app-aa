@@ -1,17 +1,24 @@
-//frontend code for the swap page
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './App.css';
 
 const Swap = () => {
     const [initData, setInitData] = useState('');
-    const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '' });
+    const [balances, setBalances] = useState({ usdtBalance: '', usdcBalance: '', wethBalance: '' });
     const [fromCurrency, setFromCurrency] = useState('USDT');
     const [toCurrency, setToCurrency] = useState('USDC');
     const [amount, setAmount] = useState('');
     const [rate, setRate] = useState('');
     const [transactionHash, setTransactionHash] = useState('');
+
+    const swapEndpoints = {
+        'USDT-USDC': { rate: '/getUsdtToUsdcRate', swap: '/swapUsdtToUsdc' },
+        'USDC-USDT': { rate: '/getUsdcToUsdtRate', swap: '/swapUsdcToUsdt' },
+        'ETH-USDC': { rate: '/getWethToUsdcRate', swap: '/swapWethToUsdc' },
+        'USDC-ETH': { rate: '/getUsdcToWethRate', swap: '/swapUsdcToWeth' },
+        'ETH-USDT': { rate: '/getWethToUsdtRate', swap: '/swapWethToUsdt' },
+        'USDT-ETH': { rate: '/getUsdtToWethRate', swap: '/swapUsdtToWeth' },
+    };
 
     useEffect(() => {
         if (window.Telegram.WebApp.initData) {
@@ -35,9 +42,12 @@ const Swap = () => {
         const fetchRate = async () => {
             if (amount) {
                 try {
-                    const endpoint = fromCurrency === 'USDT' ? '/getUsdtToUsdcRate' : '/getUsdcToUsdtRate';
-                    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { amount });
-                    setRate(response.data.rate);
+                    const key = `${fromCurrency}-${toCurrency}`;
+                    if (swapEndpoints[key]) {
+                        const endpoint = swapEndpoints[key].rate;
+                        const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { amount });
+                        setRate(response.data.rate);
+                    }
                 } catch (error) {
                     console.error('Error fetching rate:', error.response ? error.response.data : error.message);
                 }
@@ -49,24 +59,27 @@ const Swap = () => {
         }, 1000);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [amount, fromCurrency]);
+    }, [amount, fromCurrency, toCurrency]);
 
     const handleSwitch = () => {
-        setFromCurrency(fromCurrency === 'USDT' ? 'USDC' : 'USDT');
-        setToCurrency(toCurrency === 'USDT' ? 'USDC' : 'USDT');
+        setFromCurrency(toCurrency);
+        setToCurrency(fromCurrency);
         setRate('');
     };
 
     const handleSwap = async () => {
         try {
-            const endpoint = fromCurrency === 'USDT' ? '/swapUsdtToUsdc' : '/swapUsdcToUsdt';
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { initData, amount });
-            setTransactionHash(response.data.transactionHash);
-            alert(`Swap successful! Transaction hash: ${response.data.transactionHash}`);
+            const key = `${fromCurrency}-${toCurrency}`;
+            if (swapEndpoints[key]) {
+                const endpoint = swapEndpoints[key].swap;
+                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { initData, amount });
+                setTransactionHash(response.data.transactionHash);
+                alert(`Swap successful! Transaction hash: ${response.data.transactionHash}`);
 
-            // Fetch updated balances after successful swap
-            const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
-            setBalances(balanceResponse.data.balances);
+                // Fetch updated balances after successful swap
+                const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
+                setBalances(balanceResponse.data.balances);
+            }
         } catch (error) {
             console.error('Error executing swap:', error.response ? error.response.data : error.message);
             alert('Swap failed!');
@@ -81,8 +94,14 @@ const Swap = () => {
             <div className="balance-info">
                 <p>USDT balance: {balances.usdtBalance ? formatBalance(balances.usdtBalance) : 'Loading...'}</p>
                 <p>USDC balance: {balances.usdcBalance ? formatBalance(balances.usdcBalance) : 'Loading...'}</p>
+                <p>ETH balance: {balances.ethBalance ? formatBalance(balances.ethBalance) : 'Loading...'}</p>
             </div>
             <div className="swap-widget">
+                <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+                    <option value="USDT">USDT</option>
+                    <option value="USDC">USDC</option>
+                    <option value="ETH">ETH</option>
+                </select>
                 <input
                     type="text"
                     value={amount}
@@ -92,6 +111,11 @@ const Swap = () => {
                 <br />
                 <button onClick={handleSwitch}>Switch</button>
                 <br />
+                <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+                    <option value="USDT">USDT</option>
+                    <option value="USDC">USDC</option>
+                    <option value="ETH">ETH</option>
+                </select>
                 <input
                     type="text"
                     value={rate ? parseFloat(rate).toFixed(4) : ''}

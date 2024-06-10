@@ -15,6 +15,8 @@ const fs = require('fs');
 const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const MetadataIndex = require('./models/MetadataIndex');
 const { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount } = require('./swap');
+const { getUsdtToWethSwapRate, getWethToUsdtSwapRate, getUsdcToWethSwapRate, getWethToUsdcSwapRate, swapUsdtToWethAmount, swapWethToUsdtAmount, swapUsdcToWethAmount, swapWethToUsdcAmount } = require('./swap');
+
 
 require('dotenv').config();
 
@@ -268,6 +270,90 @@ app.post('/getUsdcToUsdtRate', async (req, res) => {
     }
 });
 
+// New endpoint for fetching USDT to WETH swap rate
+app.post('/getUsdtToWethRate', async (req, res) => {
+    console.log('Received request at /getUsdtToWethRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const usdtToWethRate = await getUsdtToWethSwapRate(amount);
+        console.log('USDT to WETH Rate:', usdtToWethRate);
+        return res.status(200).json({ rate: usdtToWethRate });
+    } catch (error) {
+        console.error('Error getting USDT to WETH rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// New endpoint for fetching WETH to USDT swap rate
+app.post('/getWethToUsdtRate', async (req, res) => {
+    console.log('Received request at /getWethToUsdtRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const wethToUsdtRate = await getWethToUsdtSwapRate(amount);
+        console.log('WETH to USDT Rate:', wethToUsdtRate);
+        return res.status(200).json({ rate: wethToUsdtRate });
+    } catch (error) {
+        console.error('Error getting WETH to USDT rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// New endpoint for fetching USDC to WETH swap rate
+app.post('/getUsdcToWethRate', async (req, res) => {
+    console.log('Received request at /getUsdcToWethRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const usdcToWethRate = await getUsdcToWethSwapRate(amount);
+        console.log('USDC to WETH Rate:', usdcToWethRate);
+        return res.status(200).json({ rate: usdcToWethRate });
+    } catch (error) {
+        console.error('Error getting USDC to WETH rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
+// New endpoint for fetching WETH to USDC swap rate
+app.post('/getWethToUsdcRate', async (req, res) => {
+    console.log('Received request at /getWethToUsdcRate');
+    console.log('Request body:', req.body);
+    const { amount } = req.body;
+
+    if (!amount) {
+        console.log('Amount is missing');
+        return res.status(400).send('Amount is required');
+    }
+
+    try {
+        const wethToUsdcRate = await getWethToUsdcSwapRate(amount);
+        console.log('WETH to USDC Rate:', wethToUsdcRate);
+        return res.status(200).json({ rate: wethToUsdcRate });
+    } catch (error) {
+        console.error('Error getting WETH to USDC rate:', error);
+        return res.status(500).send('Internal server error');
+    }
+});
+
 // New endpoint for swapping USDT to USDC
 app.post('/swapUsdtToUsdc', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
     const { amount } = req.body;
@@ -283,6 +369,39 @@ app.post('/swapUsdcToUsdt', (req, res) => handlePrivateKeyAction(req, res, async
     const transactionHash = await swapUsdcToUsdtAmount(privateKey, amount);
     return res.status(200).json({ transactionHash });
 }));
+
+// New endpoint for swapping USDT to WETH
+app.post('/swapUsdtToWeth', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping USDT to WETH...');
+    const transactionHash = await swapUsdtToWethAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
+
+// New endpoint for swapping WETH to USDT
+app.post('/swapWethToUsdt', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping WETH to USDT...');
+    const transactionHash = await swapWethToUsdtAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
+
+// New endpoint for swapping USDC to WETH
+app.post('/swapUsdcToWeth', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping USDC to WETH...');
+    const transactionHash = await swapUsdcToWethAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
+
+// New endpoint for swapping WETH to USDC
+app.post('/swapWethToUsdc', (req, res) => handlePrivateKeyAction(req, res, async (privateKey, res) => {
+    const { amount } = req.body;
+    console.log('Swapping WETH to USDC...');
+    const transactionHash = await swapWethToUsdcAmount(privateKey, amount);
+    return res.status(200).json({ transactionHash });
+}));
+
 
 app.use('/webhook', webhookRouter);
 
