@@ -9,6 +9,8 @@ import { ReactComponent as SendIcon } from './icons/arrow-up-solid.svg';
 import { ReactComponent as SwapIcon } from './icons/right-left-solid.svg';
 import { ReactComponent as NftIcon } from './icons/gem-regular.svg';
 import { ReactComponent as CopyIcon } from './icons/copy-solid.svg';
+import BaseIcon from './icons/base-logo-in-blue.png';  // Adjust the path based on your file structure
+
 
 import { getWalletBalance } from './balance'; // Import the balance fetching function
 import './App.css';
@@ -225,6 +227,11 @@ const Home = () => {
                     <p>{formatWalletAddress(walletAddress)}</p>
                     <CopyIcon className='copy-icon'/>
                     </div>
+                    <div className='header-network'>
+                        <img src={BaseIcon} alt="Base Sepolia" className="base-icon" />
+                        <p>Base Sepolia</p>
+                    </div>
+
                     <h2>{parseFloat(walletBalance).toFixed(4)} ETH</h2> {/* Display wallet balance */}
                     <EthToUsdConverter ethValue={walletBalance} />
                     <div className="mint-header-icons">

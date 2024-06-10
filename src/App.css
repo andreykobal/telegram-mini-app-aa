@@ -500,8 +500,8 @@ button {
 }
 .mint-header-icon-svg {
   fill: white;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 8px;
   background: linear-gradient(180deg,
             #FF9502,
@@ -517,6 +517,28 @@ button {
   margin: 8px 0;
   padding: 4px 8px;
   border-radius: 16px;
+}
+.mint-header-icon p {
+  font-size: 12px;
+
+}
+.header-network {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.header-network img {
+  width: 12px;
+  height: 12px;
+}
+.header-network p {
+  font-size: 12px;
+}
+.base-logo {
+  width: 16px;
+  height: 16px;
 }
 .mint-header-wallet-address p {
   font-size: 12px;
