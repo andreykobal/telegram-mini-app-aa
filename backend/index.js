@@ -16,6 +16,7 @@ const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
 const MetadataIndex = require('./models/MetadataIndex');
 const { getBalances, getUsdtToUsdcSwapRate, getUsdcToUsdtSwapRate, swapUsdtToUsdcAmount, swapUsdcToUsdtAmount } = require('./swap');
 const { getUsdtToWethSwapRate, getWethToUsdtSwapRate, getUsdcToWethSwapRate, getWethToUsdcSwapRate, swapUsdtToWethAmount, swapWethToUsdtAmount, swapUsdcToWethAmount, swapWethToUsdcAmount } = require('./swap');
+const stripeRouter = require('./stripe');
 
 
 require('dotenv').config();
@@ -35,6 +36,8 @@ const secretClient = new SecretClient(keyVaultUrl, credential);
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.error('MongoDB connection error:', err));
+
+app.use('/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -507,7 +510,8 @@ app.post('/swapWethToUsdc', async (req, res) => {
 
 
 
-app.use('/webhook', webhookRouter);
+// app.use('/webhook', webhookRouter);
+app.use(stripeRouter);
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
