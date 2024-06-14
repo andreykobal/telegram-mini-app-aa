@@ -68,6 +68,8 @@ router.post('/create-checkout-session', async (req, res) => {
             automatic_tax: { enabled: true },
         });
 
+        console.log('Session created:', session.id);
+
         res.send({ clientSecret: session.client_secret });
     } catch (error) {
         res.status(500).send({ error: error.message });
@@ -76,7 +78,10 @@ router.post('/create-checkout-session', async (req, res) => {
 
 router.get('/session-status', async (req, res) => {
     try {
+        console.log('Session ID:', req.query.session_id);
+
         const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
+
 
         res.send({
             status: session.status,
