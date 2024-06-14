@@ -223,7 +223,7 @@ const Home = () => {
         <div className="Home">
             <div className="nft-page">
                 {/* button navigate /checkout */}
-                <button onClick={() => navigate('/checkout')}>Stripe</button>
+                {/* <button onClick={() => navigate('/checkout')}>Stripe</button> */}
                 <div className="mint-header">
                     {/* <p className='glow-text'>✨ Account Abstraction Magic ✨</p> */}
                     <div className="mint-header-wallet-address" onClick={handleCopyClick}>

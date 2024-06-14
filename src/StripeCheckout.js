@@ -1,4 +1,3 @@
-// StripeCheckout.js
 import React, { useCallback, useState, useEffect } from "react";
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -35,47 +34,28 @@ const CheckoutForm = () => {
 const Return = () => {
     const [status, setStatus] = useState(null);
     const [customerEmail, setCustomerEmail] = useState('');
-    const [initData, setInitData] = useState('');
-
-    const mint = useCallback(async () => {
-        try {
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/mint`, { initData });
-            console.log(response.data);
-            const { transactionHash } = response.data;
-            const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
-            alert(`Minted NFT! View transaction: ${txLink}`);
-        } catch (error) {
-            console.error('Error minting data:', error);
-        }
-    }, [initData]);
+    const [transactionHash, setTransactionHash] = useState('');
 
     useEffect(() => {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
         const sessionId = urlParams.get('session_id');
+        const initData = window.Telegram.WebApp.initData || '';
 
-        const fetchSessionStatus = async () => {
+        const fetchSessionStatusAndMint = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/session-status?session_id=${sessionId}`);
-                const data = await res.json();
+                const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/session-status-mint`, { sessionId, initData });
+                const data = res.data;
                 setStatus(data.status);
                 setCustomerEmail(data.customer_email);
-                if (data.status === 'complete' && window.Telegram.WebApp.initData) {
-                    setInitData(window.Telegram.WebApp.initData);
-                }
+                setTransactionHash(data.transaction_hash);
             } catch (error) {
-                console.error('Error fetching session status:', error);
+                console.error('Error fetching session status and minting:', error);
             }
         };
 
-        fetchSessionStatus();
+        fetchSessionStatusAndMint();
     }, []);
-
-    useEffect(() => {
-        if (status === 'complete' && initData) {
-            mint();
-        }
-    }, [status, initData, mint]);
 
     if (status === 'open') {
         return <Navigate to="/checkout" />;
@@ -88,6 +68,11 @@ const Return = () => {
                     We appreciate your business! A confirmation email will be sent to {customerEmail}.
                     If you have any questions, please email <a href="mailto:orders@example.com">orders@example.com</a>.
                 </p>
+                {transactionHash && transactionHash !== 'EMPTY' && (
+                    <p>
+                        Your transaction hash: <a href={`https://sepolia.basescan.org/tx/${transactionHash}`} target="_blank" rel="noopener noreferrer">{transactionHash}</a>
+                    </p>
+                )}
             </section>
         );
     }

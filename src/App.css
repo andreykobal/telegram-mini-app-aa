@@ -794,3 +794,6 @@ button {
   justify-content: center;
   align-items: center;
 }
+#success {
+  color: white;
+}
