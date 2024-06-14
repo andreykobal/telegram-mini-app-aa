@@ -1,10 +1,23 @@
+//nftOwner.js
+
 const { createPublicClient, createWalletClient, http } = require("viem");
 const { privateKeyToAccount } = require("viem/accounts");
 const { baseSepolia } = require("viem/chains");
 const { createSmartAccountClient, PaymasterMode } = require("@biconomy/account");
 const { parseAbi, encodeFunctionData } = require("viem");
-
+const MetadataIndex = require('./models/MetadataIndex');
+const mongoose = require('mongoose');
+const fs = require('fs');
+const crypto = require('crypto');
+const { DefaultAzureCredential } = require('@azure/identity');
+const { SecretClient } = require('@azure/keyvault-secrets');
 require('dotenv').config();
+
+const uri = process.env.MONGODB_URI;
+
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB connected...'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 const config = {
     biconomyPaymasterApiKey: process.env.BICONOMY_PAYMASTER_API_KEY,
@@ -14,6 +27,13 @@ const config = {
 
 const customRpcUrl = process.env.CUSTOM_RPC_URL;
 const ownerPrivateKey = process.env.OWNER_PRIVATE_KEY;
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const SECRET_KEY = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
+
+const keyVaultName = "aa-testnet";
+const keyVaultUrl = `https://${keyVaultName}.vault.azure.net`;
+const credential = new DefaultAzureCredential();
+const secretClient = new SecretClient(keyVaultUrl, credential);
 
 const abiItem = {
     inputs: [
@@ -58,8 +78,69 @@ async function getSmartWalletAddress(privateKey) {
     return saAddress;
 }
 
-async function mintOnlyOwner(callerPrivateKey, tokenURI) {
- const ownerAccount = privateKeyToAccount(ownerPrivateKey);
+async function getTokenURI() {
+    const metadata = JSON.parse(fs.readFileSync('metadata.json', 'utf8'));
+    const indexDoc = await MetadataIndex.findOneAndUpdate(
+        {},
+        { $inc: { currentIndex: 1 } },
+        { new: true, upsert: true }
+    );
+
+    if (indexDoc.currentIndex >= metadata.urls.length) {
+        indexDoc.currentIndex = 0;
+        await indexDoc.save();
+    }
+
+    return metadata.urls[indexDoc.currentIndex];
+}
+
+async function getPrivateKeyFromKeyVault(secretName) {
+    try {
+        const retrievedSecret = await secretClient.getSecret(secretName);
+        console.log('Retrieved private key from Azure Key Vault:', retrievedSecret.value);
+        return retrievedSecret.value;
+    } catch (err) {
+        console.error('Error retrieving private key from Azure Key Vault:', err);
+        throw err;
+    }
+}
+
+function validateTelegramData(initData) {
+    console.log('Validating Telegram Data:', initData);
+    const urlParams = new URLSearchParams(initData);
+
+    const dataCheckString = Array.from(urlParams.entries())
+        .filter(([key]) => key !== 'hash')
+        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+        .map(([key, value]) => `${key}=${value}`)
+        .join('\n');
+
+    console.log('Data Check String:', dataCheckString);
+
+    const receivedHash = urlParams.get('hash');
+    console.log('Received Hash:', receivedHash);
+
+    const computedHash = crypto.createHmac('sha256', SECRET_KEY).update(dataCheckString).digest('hex');
+    console.log('Computed HMAC:', computedHash);
+
+    return computedHash === receivedHash;
+}
+
+async function mintWithInitData(initData) {
+    if (!validateTelegramData(initData)) {
+        throw new Error('Invalid init data');
+    }
+
+    const urlParams = new URLSearchParams(initData);
+    const userObj = urlParams.get('user') ? JSON.parse(urlParams.get('user')) : null;
+    const telegramId = userObj ? userObj.id : null;
+
+    if (!telegramId) {
+        throw new Error('Telegram ID is required');
+    }
+
+    const callerPrivateKey = await getPrivateKeyFromKeyVault(String(telegramId));
+    const ownerAccount = privateKeyToAccount(ownerPrivateKey);
     const ownerClient = createWalletClient({
         account: ownerAccount,
         chain: baseSepolia,
@@ -73,6 +154,7 @@ async function mintOnlyOwner(callerPrivateKey, tokenURI) {
     });
 
     const callerSmartWalletAddress = await getSmartWalletAddress(callerPrivateKey);
+    const tokenURI = await getTokenURI();
 
     const encodedCall = encodeFunctionData({
         abi: [abiItem],
@@ -101,15 +183,5 @@ async function mintOnlyOwner(callerPrivateKey, tokenURI) {
     return transactionHash;
 }
 
-module.exports = { mintOnlyOwner };
+module.exports = { mintWithInitData };
 
-// async function testMint(callerPrivateKey, tokenURI) {
-//     try {
-//         const transactionHash = await mintOnlyOwner(callerPrivateKey, tokenURI);
-//         console.log(`Mint successful, transaction hash: ${transactionHash}`);
-//     } catch (error) {
-//         console.error("Mint failed:", error);
-//     }
-// }
-
-// testMint("0x2cae22cabf1d13aaf1629f385357d63d2050a29a9b7c3ccbb7a30a7105d33ea9", "https://gateway.pinata.cloud/ipfs/QmdCqyMLHYpPJopQDzN2twi7gSVXaAXLpobG6ZVbMCiXVc");
