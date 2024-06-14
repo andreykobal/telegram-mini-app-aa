@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { mintWithInitData } = require('./nftOwner');
 
 const YOUR_DOMAIN = process.env.WEB_APP_URL;
 
@@ -92,5 +93,31 @@ router.get('/session-status', async (req, res) => {
         res.status(500).send({ error: error.message });
     }
 });
+
+router.post('/stripe-mint-nft', async (req, res) => {
+    try {
+        const { sessionId, initData } = req.body;
+
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+        if (session.status === 'complete') {
+            const transactionHash = await mintWithInitData(initData);
+            res.send({
+                status: session.status,
+                customer_email: session.customer_details.email,
+                transaction_hash: transactionHash
+            });
+        } else {
+            res.send({
+                status: session.status,
+                customer_email: session.customer_details.email,
+                transaction_hash: 'EMPTY'
+            });
+        }
+    } catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+});
+
 
 module.exports = router;
