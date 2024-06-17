@@ -9,7 +9,7 @@ const Buy = () => {
     useEffect(() => {
         const fetchSignedUrl = async () => {
             try {
-                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/generate-signed-url`, {
+                const response = await axios.post(`/api/generate-signed-url`, {
                     walletAddress: '0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae', // replace with actual wallet address
                     currencyCode: 'eth',
                 }, {

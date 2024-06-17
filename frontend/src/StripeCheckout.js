@@ -13,7 +13,7 @@ const stripePromise = loadStripe("pk_test_51PQvlnDaHIamwdLarWLmauQm0XqEynnoKi8yA
 const CheckoutForm = () => {
     const fetchClientSecret = useCallback(() => {
         // Create a Checkout Session
-        return fetch(`${process.env.REACT_APP_BACKEND_URL}/create-checkout-session`, {
+        return fetch(`/create-checkout-session`, {
             method: "POST",
         })
             .then((res) => res.json())
@@ -44,7 +44,7 @@ const Return = () => {
 
         const fetchSessionStatusAndMint = async () => {
             try {
-                const res = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/session-status-mint`, { sessionId, initData });
+                const res = await axios.post(`/session-status-mint`, { sessionId, initData });
                 const data = res.data;
                 setStatus(data.status);
                 setCustomerEmail(data.customer_email);

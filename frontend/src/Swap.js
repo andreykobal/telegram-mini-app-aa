@@ -44,8 +44,8 @@ const Swap = () => {
 
         const authenticateData = async () => {
             try {
-                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/authenticate`, { initData });
-                const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
+                const response = await axios.post(`/authenticate`, { initData });
+                const balanceResponse = await axios.post(`/getBalances`, { initData });
                 setBalances(balanceResponse.data.balances);
             } catch (error) {
                 console.error('Error validating data:', error.response ? error.response.data : error.message);
@@ -62,7 +62,7 @@ const Swap = () => {
                     const key = `${fromCurrency}-${toCurrency}`;
                     if (swapEndpoints[key]) {
                         const endpoint = swapEndpoints[key].rate;
-                        const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { amount });
+                        const response = await axios.post(`${endpoint}`, { amount });
                         setRate(response.data.rate);
                     }
                 } catch (error) {
@@ -91,7 +91,7 @@ const Swap = () => {
             const key = `${fromCurrency}-${toCurrency}`;
             if (swapEndpoints[key]) {
                 const endpoint = swapEndpoints[key].swap;
-                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { initData, amount });
+                const response = await axios.post(`${endpoint}`, { initData, amount });
                 setTransactionHash(response.data.transactionHash);
 
                 const txLink = `https://sepolia.basescan.org/tx/${response.data.transactionHash}`;
@@ -101,7 +101,7 @@ const Swap = () => {
                 });
 
                 // Fetch updated balances after successful swap
-                const balanceResponse = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getBalances`, { initData });
+                const balanceResponse = await axios.post(`/getBalances`, { initData });
                 setBalances(balanceResponse.data.balances);
             }
         } catch (error) {
@@ -118,7 +118,7 @@ const Swap = () => {
                 const key = `${fromCurrency}-${toCurrency}`;
                 if (swapEndpoints[key]) {
                     const endpoint = swapEndpoints[key].rate;
-                    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}${endpoint}`, { amount: "1" });
+                    const response = await axios.post(`${endpoint}`, { amount: "1" });
                     setExchangeRate(response.data.rate);
                 }
             } catch (error) {

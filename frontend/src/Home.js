@@ -68,7 +68,7 @@ const Home = () => {
 
         const authenticateData = async () => {
             try {
-                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/authenticate`, { initData });
+                const response = await axios.post(`/authenticate`, { initData });
                 console.log(response.data);
                 setWalletAddress(response.data.user.walletAddress);
                 getNFTs();
@@ -85,7 +85,7 @@ const Home = () => {
     const getNFTs = async () => {
         try {
             setLoading(true);
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/getNFTs`, { initData });
+            const response = await axios.post(`/getNFTs`, { initData });
             console.log(response.data);
             const nftPromises = response.data.nfts[0].map(async (tokenId, index) => {
                 const tokenUri = response.data.nfts[1][index];
@@ -115,7 +115,7 @@ const Home = () => {
         try {
             setShowPopup(true);
             setPopupContent({ message: 'Minting NFT...', showLoader: true });
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/mint`, { initData });
+            const response = await axios.post(`/mint`, { initData });
             console.log(response.data);
             const { transactionHash } = response.data;
             const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
@@ -133,7 +133,7 @@ const Home = () => {
     const transfer = async () => {
         try {
             setPopupContent({ message: 'Transferring NFT...', showLoader: true });
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/transfer`, { initData, tokenId, toAddress });
+            const response = await axios.post(`/transfer`, { initData, tokenId, toAddress });
             console.log(response.data);
             const { transactionHash } = response.data;
             const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
@@ -169,7 +169,7 @@ const Home = () => {
     const sendEth = async (amount, toAddress) => {
         try {
             setPopupContent({ message: 'Sending ETH...', showLoader: true });
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/sendETH`, { initData, toAddress, amount });
+            const response = await axios.post(`/sendETH`, { initData, toAddress, amount });
             const { transactionHash } = response.data;
             const txLink = `https://sepolia.basescan.org/tx/${transactionHash}`;
             setPopupContent({
