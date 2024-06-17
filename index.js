@@ -2,6 +2,7 @@
 
 const { generatePrivateKey } = require('viem/accounts');
 const express = require('express');
+const path = require('path');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const cors = require('cors');
@@ -512,6 +513,13 @@ app.post('/swapWethToUsdc', async (req, res) => {
 
 app.use('/webhook', webhookRouter);
 app.use(stripeRouter);
+
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
+});
+
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
