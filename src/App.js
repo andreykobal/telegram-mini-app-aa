@@ -5,8 +5,12 @@ import Home from './Home';
 import Swap from './Swap';
 import Buy from './Buy';
 import { CheckoutForm, Return } from './StripeCheckout'; // Import the new Stripe component
+import eruda from 'eruda'
+
 
 function App() {
+  eruda.init()
+
   return (
     <Router>
       <Routes>
