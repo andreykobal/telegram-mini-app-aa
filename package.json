@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\"",
+    "client-install": "npm install --prefix frontend",
+    "client-build": "CI=false npm run build --prefix frontend",
+    "client-start": "npm start --prefix frontend",
+    "dev": "concurrently \"npm start\" \"npm run client-start\"",
+    "build": "npm run client-build"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +31,11 @@
     "mongodb": "^6.7.0",
     "mongoose": "^8.4.1",
     "node-fetch": "^3.3.2",
+    "stripe": "^15.11.0",
     "viem": "^2.13.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "npm-run-all": "^4.1.5"
   }
 }
