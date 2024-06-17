@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\"",
-    "client-install": "npm install --prefix frontend",
+    "client-install": "npm install --legacy-peer-deps --prefix frontend",
     "client-build": "CI=false npm run build --prefix frontend",
     "client-start": "npm start --prefix frontend",
     "dev": "concurrently \"npm start\" \"npm run client-start\"",
