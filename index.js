@@ -29,7 +29,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const SECRET_KEY = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest();
 const uri = process.env.MONGODB_URI;
 
-const keyVaultName = "aa-testnet";
+const keyVaultName = "aa-dev-vault";
 const keyVaultUrl = `https://${keyVaultName}.vault.azure.net`;
 const credential = new DefaultAzureCredential();
 const secretClient = new SecretClient(keyVaultUrl, credential);
