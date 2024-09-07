@@ -20,7 +20,9 @@ import EthToUsdConverter from './EthToUsdConverter';
 
 
 const Home = () => {
-    const [initData, setInitData] = useState('');
+    const [initData, setInitData] = useState(
+        window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp.initData : ''
+    );    
     const [tokenId, setTokenId] = useState('');
     const [toAddress, setToAddress] = useState('');
     const [nfts, setNfts] = useState([]);
@@ -63,25 +65,24 @@ const Home = () => {
     };
 
     useEffect(() => {
-        if (window.Telegram.WebApp.initData) {
-            setInitData(window.Telegram.WebApp.initData);
+        if (initData) {
+            const authenticateData = async () => {
+                try {
+                    const response = await axios.post(`/authenticate`, { initData });
+                    console.log(response.data);
+                    setWalletAddress(response.data.user.walletAddress);
+                    getNFTs();
+                    const balance = await getWalletBalance(response.data.user.walletAddress); // Fetch wallet balance
+                    setWalletBalance(balance); // Set the fetched balance
+                } catch (error) {
+                    console.error('Error validating data:', error);
+                }
+            };
+
+            authenticateData();
         }
-
-        const authenticateData = async () => {
-            try {
-                const response = await axios.post(`/authenticate`, { initData });
-                console.log(response.data);
-                setWalletAddress(response.data.user.walletAddress);
-                getNFTs();
-                const balance = await getWalletBalance(response.data.user.walletAddress); // Fetch wallet balance
-                setWalletBalance(balance); // Set the fetched balance
-            } catch (error) {
-                console.error('Error validating data:', error);
-            }
-        };
-
-        authenticateData();
     }, [initData]);
+
 
     const getNFTs = async () => {
         try {
